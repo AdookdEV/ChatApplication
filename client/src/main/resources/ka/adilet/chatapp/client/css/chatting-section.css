@@ -1,0 +1,17 @@
+.chatting-section-vbox {
+    -fx-background-color: transparent;
+}
+
+.top-bar {
+    -fx-background-color: #282E33;
+}
+
+.bottom-bar {
+    -fx-background-color: #282E33;
+}
+
+.message_text-field {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 1.1em;
+}

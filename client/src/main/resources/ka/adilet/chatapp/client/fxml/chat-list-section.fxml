@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="266.0" snapToPixel="false" styleClass="chat-list-background" stylesheets="@../css/chat-list-section.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ka.adilet.chatapp.client.controller.ChatListController">
+   <children>
+      <GridPane prefHeight="50.0">
+         <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+         </rowConstraints>
+         <children>
+            <TextField fx:id="searchChatTextField" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="30.0" prefWidth="200.0" promptText="Search" snapToPixel="false" styleClass="search_text-field" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+         </children>
+      </GridPane>
+      <ListView fx:id="chatListView" prefHeight="200.0" prefWidth="200.0" styleClass="chat-list-background" VBox.vgrow="ALWAYS" />
+   </children>
+</VBox>

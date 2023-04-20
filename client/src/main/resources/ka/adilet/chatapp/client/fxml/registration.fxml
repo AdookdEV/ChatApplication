@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<GridPane fx:id="errorLabel" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" styleClass="background-color" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ka.adilet.chatapp.client.controller.RegistrationController">
+   <columnConstraints>
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+   </rowConstraints>
+   <children>
+      <VBox maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="350.0" prefWidth="300.0" spacing="10.0" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+         <children>
+            <Label alignment="CENTER" maxWidth="1.7976931348623157E308" styleClass="header" text="Sign up">
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </Label>
+            <TextField fx:id="phoneTextField" maxHeight="-Infinity" prefHeight="30.0" promptText="Phone number" styleClass="login_text-field">
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </TextField>
+            <TextField fx:id="nameTextField" maxHeight="-Infinity" prefHeight="30.0" promptText="Name" styleClass="login_text-field" />
+            <TextField fx:id="surnameTextField" maxHeight="-Infinity" prefHeight="30.0" promptText="Surname (optional)" styleClass="login_text-field" />
+            <PasswordField fx:id="passwordTextField" promptText="Password">
+               <styleClass>
+                  <String fx:value="login_text-field" />
+                  <String fx:value="password_text-field" />
+               </styleClass>
+               <VBox.margin>
+                  <Insets bottom="2.0" />
+               </VBox.margin>
+            </PasswordField>
+            <Label fx:id="regErrorLabel" alignment="CENTER" maxWidth="1.7976931348623157E308" styleClass="error_label" text="Error" />
+            <Button fx:id="loginButton" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#signUp" prefHeight="40.0" styleClass="login_button" text="Sign up" />
+            <GridPane>
+               <VBox.margin>
+                  <Insets top="5.0" />
+               </VBox.margin>
+               <columnConstraints>
+                  <ColumnConstraints fillWidth="false" hgrow="SOMETIMES" minWidth="10.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+               <children>
+                  <HBox GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                     <children>
+                        <Label maxHeight="1.7976931348623157E308" style="-fx-text-fill: white;" text="Already have an accout?" />
+                        <Hyperlink fx:id="signInLink" maxHeight="1.7976931348623157E308" onAction="#goToLogin" styleClass="link" text="Sign in" />
+                     </children>
+                  </HBox>
+               </children>
+            </GridPane>
+         </children>
+         <padding>
+            <Insets left="40.0" right="40.0" />
+         </padding>
+      </VBox>
+   </children>
+   <stylesheets>
+      <URL value="@../css/authentication-screen.css" />
+      <URL value="@../css/main.css" />
+   </stylesheets>
+</GridPane>

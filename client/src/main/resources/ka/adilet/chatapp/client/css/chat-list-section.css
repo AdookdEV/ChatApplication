@@ -1,0 +1,40 @@
+.chat-list-background {
+    -fx-background-color: #282E33;
+}
+
+.search_text-field {
+    -fx-background-color: #3D444B;
+    -fx-text-fill: white;
+    -fx-background-radius: 7px;
+    -fx-font-size: 1.09em;
+}
+
+.list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+}
+
+.list-cell:hover {
+    -fx-background-color: #4A555E;
+}
+
+.list-cell:empty {
+    -fx-background-color: transparent;
+}
+
+.list-cell:focused {
+    -fx-background-color: #30AB9B;
+}
+
+.list-view:focused {
+    -fx-background-insets: 0;
+}
+
+
+
+
+
+
+
+
+

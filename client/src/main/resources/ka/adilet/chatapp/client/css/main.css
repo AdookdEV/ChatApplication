@@ -1,0 +1,45 @@
+.text{
+    -fx-font-smoothing-type: gray;
+    /*-fx-font-family: 'Roboto', 'sans-serif';*/
+}
+
+.text-field. .label {
+    /*-fx-font-family: 'Roboto', 'sans-serif';*/
+}
+
+.background-color {
+    -fx-background-color: #18191D;
+}
+
+.scroll-pane {
+    -fx-background-color:transparent;
+    -fx-border-color: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color:transparent;
+    -fx-border-color: transparent;
+}
+
+.choose-chat_label {
+    -fx-background-color: #2F343B;
+    -fx-text-fill: white;
+    -fx-background-radius: 15px;
+    -fx-padding: 4 15 4 15;
+    -fx-font-weight: bold;
+}
+
+.scroll-pane > .scroll-bar {
+    -fx-background-color: #4B4F54;
+    -fx-pref-width: 4;
+    -fx-background-radius: 4;
+}
+
+.scroll-bar > .thumb {
+    -fx-background-color: red;
+}
+
+.increment-button, .decrement-button, .increment-arrow, .decrement-arrow {
+    -fx-padding: 0;
+    visibility: false;
+}

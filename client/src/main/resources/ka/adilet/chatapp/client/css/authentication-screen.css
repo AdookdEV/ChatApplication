@@ -1,0 +1,67 @@
+
+
+/* General */
+
+
+
+/* Authentication scenes style */
+.header {
+    -fx-text-fill: white;
+    -fx-font-size: 2.5em;
+}
+
+.login_text-field {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-border-color: grey;
+    -fx-border-width: 0 0 1 0;
+    -fx-font-size: 1.1em;
+}
+
+.login_text-field:focused {
+    -fx-border-color: #2DA192;
+    -fx-border-width: 0 0 2 0;
+}
+
+.password_text-field {
+    -fx-text-fill: white;
+}
+
+.error_label {
+    -fx-text-fill: #FF6060;
+    -fx-font-weight: bold;
+}
+
+.login_button {
+    -fx-font-smoothing-type: gray;
+    -fx-background-color: #2DA192;
+    -fx-font-size: 1.2em;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-background-radius: 7px;
+}
+
+.login_button:hover {
+    -fx-background-color: #30AB9B;
+    -fx-cursor: hand;
+}
+
+.link {
+    -fx-text-fill: #2DA192;
+    -fx-underline: false;
+}
+
+.link:hover {
+    -fx-underline: true;
+    -fx-cursor: hand;
+}
+
+.link:focused {
+    -fx-border-color: transparent;
+}
+
+.message-label {
+    -fx-background-color: #33393F;
+    -fx-background-radius: 10;
+    -fx-padding: 7 10 7 10;
+}

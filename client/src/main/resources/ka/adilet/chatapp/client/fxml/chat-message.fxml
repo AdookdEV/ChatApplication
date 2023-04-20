@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+
+<GridPane prefWidth="500.0" stylesheets="@../css/authentication-screen.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ka.adilet.chatapp.client.controller.ChatMessageController">
+   <columnConstraints>
+      <ColumnConstraints hgrow="ALWAYS" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints vgrow="SOMETIMES" />
+   </rowConstraints>
+   <children>
+      <HBox fillHeight="false" spacing="3.0" GridPane.halignment="LEFT">
+         <children>
+            <ImageView fx:id="avatarImageView" fitHeight="42.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../avatar.png" />
+               </image>
+            </ImageView>
+            <Label fx:id="messageContentLabel" maxWidth="250.0" styleClass="message-label" text="Hello friendHello friendHello friendHello friendHello friendHello friendHello friendHello friendHello friendHello friendHello friendHello friendHello friend" textFill="WHITE" wrapText="true">
+               <font>
+                  <Font size="13.0" />
+               </font>
+            </Label>
+         </children>
+      </HBox>
+   </children>
+</GridPane>
