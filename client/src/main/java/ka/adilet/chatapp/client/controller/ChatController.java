@@ -24,7 +24,6 @@ public class ChatController {
     private Parent chattingSection;
     @FXML
     private GridPane root;
-
     @FXML
     private ChatListController chatListSectionController;
     @FXML

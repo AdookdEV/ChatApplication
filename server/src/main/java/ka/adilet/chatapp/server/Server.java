@@ -3,6 +3,7 @@ package ka.adilet.chatapp.server;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -32,7 +33,6 @@ public class Server {
             ClientHandler ch = new ClientHandler(socket.accept());
             ch.setName("Client handler #" + (++cnt));
             ch.start();
-            System.out.println(cnt + " client connected");
         }
     }
 
@@ -87,7 +87,6 @@ public class Server {
         }
 
         private void handleLogin(CommunicationMessage cm) {
-            System.out.println("[INFO] Got request to login a user");
             System.out.println(cm.getBody());
             CommunicationMessage message = new CommunicationMessage(
                     MessageType.AUTHORIZATION_RESULT,
@@ -96,9 +95,7 @@ public class Server {
         }
 
         private void handleRegister(CommunicationMessage cm) {
-            System.out.println("[INFO] Got request to register a user");
             addUserToDB(cm.getBody());
-            System.out.println("[INFO] Added user's data to database.");
             CommunicationMessage message = new CommunicationMessage(
                     MessageType.AUTHORIZATION_RESULT,
                     "{\"status\": \"OK\"}");
@@ -139,7 +136,7 @@ public class Server {
                     CommunicationMessage clientMessage;
                     try {
                         clientMessage = (CommunicationMessage)inputStream.readObject();
-                    } catch (EOFException e) {
+                    } catch (EOFException | SocketException e) {
                         System.out.println("Client disconnected");
                         break;
                     }
