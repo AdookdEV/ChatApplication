@@ -75,9 +75,12 @@ public class RegistrationController implements Initializable {
             } catch (JsonProcessingException ex) {
                 throw new RuntimeException(ex);
             }
-            if (res.get("status").asText().equals("OK")) {
+            if (res.get("result").asText().equals("OK")) {
                 network.stopConnection();
                 ScreenSwitcher.switchTo(Screen.LOGIN);
+            } else {
+                regErrorLabel.setVisible(true);
+                regErrorLabel.setText(res.get("result").asText());
             }
         });
         new Thread(task).start();

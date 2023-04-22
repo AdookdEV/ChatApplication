@@ -34,8 +34,8 @@ public class LoginController implements Initializable {
     @FXML
     private TextField passwordTextField;
 
-    private Network network = new Network("localhost", 1234);
-    private ObjectMapper jsonMapper = new ObjectMapper();
+    private final Network network = new Network("localhost", 1234);
+    private final ObjectMapper jsonMapper = new ObjectMapper();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -47,23 +47,24 @@ public class LoginController implements Initializable {
         CustomAnimation.buttonClick(loginButton);
         if (!validate()) return;
         CommunicationMessage cm = new CommunicationMessage(MessageType.LOGIN,
-                String.format("{\"phone-number\": \"%s\", \"password\": \"%s\"}",
+                String.format("{\"phone_number\": \"%s\", \"password\": \"%s\"}",
                         phoneTextField.getText(), passwordTextField.getText()));
         network.sendMessage(cm);
         Task<CommunicationMessage> task = new Task<>() {
             @Override
             protected CommunicationMessage call() throws Exception {
-                CommunicationMessage message = network.listen();
-                System.out.println(message.getBody());
-                return message;
+                return network.listen();
             }
         };
         task.setOnSucceeded((e) -> {
-            System.out.println(task.getValue().getBody());
             try {
                 JsonNode node = jsonMapper.readTree(task.getValue().getBody());
-                if (node.get("status").asText().equals("OK")) {
+                if (node.get("result").asText().equals("OK")) {
                     ScreenSwitcher.switchTo(Screen.CHAT);
+                }
+                else {
+                    loginErrorLabel.setVisible(true);
+                    loginErrorLabel.setText(node.get("result").asText());
                 }
             } catch (JsonProcessingException ex) {
                 throw new RuntimeException(ex);

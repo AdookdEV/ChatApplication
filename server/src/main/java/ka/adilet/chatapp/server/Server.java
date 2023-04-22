@@ -4,23 +4,22 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import ka.adilet.chatapp.communication.CommunicationMessage;
 import ka.adilet.chatapp.communication.MessageType;
 
 public class Server {
-    private static String DB_USERNAME = "postgres";
-    private static String DB_PASSWORD = "admin";
-    private static String DB_URL = "jdbc:postgresql://localhost:5432/";
-    private static String DB_NAME = "ChatAppDB";
+    public static String DB_USERNAME = "postgres";
+    public static String DB_PASSWORD = "admin";
+    public static String DB_URL = "jdbc:postgresql://localhost:5432/";
+    public static String DB_NAME = "ChatAppDB";
 
     private ServerSocket socket;
     private boolean isRunning = true;
@@ -31,7 +30,8 @@ public class Server {
         int cnt = 0;
         while (isRunning) {
             ClientHandler ch = new ClientHandler(socket.accept());
-            ch.setName("Client handler #" + (++cnt));
+            ch.setName("Client #" + (++cnt));
+            System.out.println(ch.getName() +" connected");
             ch.start();
         }
     }
@@ -87,23 +87,50 @@ public class Server {
         }
 
         private void handleLogin(CommunicationMessage cm) {
-            System.out.println(cm.getBody());
-            CommunicationMessage message = new CommunicationMessage(
-                    MessageType.AUTHORIZATION_RESULT,
-                    "{\"status\": \"OK\"}");
-            sendMessage(message);
+            try {
+                String password = jsonMapper.readTree(cm.getBody()).get("password").asText();
+                String phoneNumber = jsonMapper.readTree(cm.getBody()).get("phone_number").asText();
+                Connection conn = DriverManager.getConnection(DB_URL + DB_NAME, DB_USERNAME, DB_PASSWORD);
+                Statement st = conn.createStatement();
+                ResultSet resultSet = st.executeQuery(
+                        String.format(String.format("select * from \"User\" where \"phone_number\"='%s'", phoneNumber)));
+                ResultSetMetaData rsmd = resultSet.getMetaData();
+                // there is no user with provided password
+                if (!resultSet.next())  {
+                    sendMessage(new CommunicationMessage(
+                            MessageType.AUTHORIZATION_RESULT,
+                            "{\"result\": \"no user found\"}"));
+                    return;
+                }
+                // password is incorrect
+                if (!resultSet.getString("password").equals(password)) {
+                    sendMessage(new CommunicationMessage(
+                            MessageType.AUTHORIZATION_RESULT,
+                            "{\"result\": \"incorrect password\"}"));
+                    return;
+                }
+                // Received data is correct, used is logged in
+                ObjectNode userNode = jsonMapper.createObjectNode();
+                for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                   userNode.put(rsmd.getColumnName(i), resultSet.getString(rsmd.getColumnName(i)));
+                }
+                System.out.println(userNode);
+                sendMessage(new CommunicationMessage(
+                        MessageType.AUTHORIZATION_RESULT,
+                        "{\"result\": \"OK\"}"));
+            } catch (Exception e) {
+                sendMessage(new CommunicationMessage(
+                        MessageType.AUTHORIZATION_RESULT,
+                        "{\"result\": \"server error\"}"));
+                throw new RuntimeException(e);
+            }
         }
 
         private void handleRegister(CommunicationMessage cm) {
             addUserToDB(cm.getBody());
-            CommunicationMessage message = new CommunicationMessage(
+            sendMessage(new CommunicationMessage(
                     MessageType.AUTHORIZATION_RESULT,
-                    "{\"status\": \"OK\"}");
-            sendMessage(message);
-        }
-
-        private void getUserFromDB() {
-            // TODO: 19.04.2023
+                    "{\"result\": \"OK\"}"));
         }
 
         private void addUserToDB(String data) {
@@ -112,18 +139,36 @@ public class Server {
             try {
                 user = jsonMapper.readTree(data);
                 conn = DriverManager.getConnection(DB_URL + DB_NAME, DB_USERNAME, DB_PASSWORD);
-                Statement st = conn.createStatement();
-                String sqlStmt = String.format("INSERT INTO \"User\" " +
-                                "(\"phone_number\", \"name\", \"surname\", \"password\") " +
-                                "VALUES ('%s', '%s', '%s', '%s');",
-                        user.get("phone_number").asText(),
-                        user.get("name").asText(),
-                        user.get("surname").asText(),
-                        user.get("password").asText());
-                st.execute(sqlStmt);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            } catch (SQLException e) {
+
+
+                // Check if the user has already registered;
+                Statement selectStmt = conn.createStatement();
+                ResultSet res = selectStmt.executeQuery(
+                        String.format(
+                                "SELECT \"phone_number\" FROM \"User\" WHERE \"phone_number\"='%s'",
+                                user.get("phone_number").asText()));
+                if (res.next()) {
+                    sendMessage(new CommunicationMessage(
+                            MessageType.AUTHORIZATION_RESULT,
+                            "{\"result\": \"A user with this number already exists\"}"));
+                    return;
+                }
+                PreparedStatement insertStmt = conn.prepareStatement("INSERT INTO \"User\" " +
+                        "(\"phone_number\", \"name\", \"surname\", \"password\") VALUES (?, ?, ?, ?);");
+                insertStmt.setString(1, user.get("phone_number").asText());
+                insertStmt.setString(2, user.get("name").asText());
+                if (user.get("surname").asText().length() > 0) {
+                    insertStmt.setString(3, user.get("surname").asText());
+                } else {
+                    insertStmt.setNull(3, Types.VARCHAR);
+                }
+                insertStmt.setString(4, user.get("password").asText());
+                insertStmt.executeUpdate();
+                conn.close();
+            } catch (Exception e) {
+                sendMessage(new CommunicationMessage(
+                        MessageType.AUTHORIZATION_RESULT,
+                        "{\"result\": \"server error\"}"));
                 throw new RuntimeException(e);
             }
         }
@@ -156,7 +201,7 @@ public class Server {
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
         Server server = new Server();
         try {
             server.start(1234);
