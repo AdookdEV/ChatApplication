@@ -7,13 +7,12 @@ import ka.adilet.chatapp.communication.MessageType;
 import java.io.*;
 import java.net.Socket;
 
-public class Network{
+public class Network {
     private Socket socket;
     private BufferedReader reader;
     private BufferedWriter writer;
     private ObjectOutputStream outputStream;
     private ObjectInputStream inputStream;
-    private Thread thread;
 
     public Network(String address, int port) {
         try {
@@ -33,20 +32,15 @@ public class Network{
             outputStream.flush();
         } catch (IOException e) {
             System.out.println("[ERROR] Couldn't send message");
-            System.err.println(e);
+            throw new RuntimeException(e);
         }
     }
 
     public CommunicationMessage listen() {
-        CommunicationMessage res=null;
+        CommunicationMessage res;
         try {
-            while (socket.isConnected()) {
-                res = (CommunicationMessage)inputStream.readObject();
-                break;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
+            res = (CommunicationMessage)inputStream.readObject();
+        } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
         return res;
