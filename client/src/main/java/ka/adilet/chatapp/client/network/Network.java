@@ -7,7 +7,7 @@ import ka.adilet.chatapp.communication.MessageType;
 import java.io.*;
 import java.net.Socket;
 
-public class Network implements Runnable {
+public class Network{
     private Socket socket;
     private BufferedReader reader;
     private BufferedWriter writer;
@@ -25,7 +25,6 @@ public class Network implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        thread = new Thread(this, "ClientThread");
     }
 
     public void sendMessage(CommunicationMessage message) {
@@ -63,15 +62,6 @@ public class Network implements Runnable {
         }
     }
 
-    @Override
-    public void run() {
-        try {
-            listen();
-            stopConnection();
-        } catch( Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     public static void main(String[] args) {
         Network network = new Network("localhost", 1234);
