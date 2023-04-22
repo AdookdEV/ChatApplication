@@ -5,10 +5,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.sql.*;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -199,7 +197,6 @@ public class Server {
             }
         }
     }
-
 
     public static void main(String[] args) throws SQLException {
         Server server = new Server();

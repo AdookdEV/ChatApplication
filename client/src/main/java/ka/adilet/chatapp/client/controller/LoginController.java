@@ -19,6 +19,7 @@ import ka.adilet.chatapp.client.view.CustomAnimation;
 import ka.adilet.chatapp.communication.CommunicationMessage;
 import ka.adilet.chatapp.communication.MessageType;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -34,17 +35,19 @@ public class LoginController implements Initializable {
     @FXML
     private TextField passwordTextField;
 
-    private final Network network = new Network("localhost", 1234);
+    private Network network;
     private final ObjectMapper jsonMapper = new ObjectMapper();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         loginErrorLabel.setVisible(false);
+        network = new Network("localhost", 1234);
     }
 
     @FXML
     public void singIn(ActionEvent event) {
         CustomAnimation.buttonClick(loginButton);
+        if (!network.isConnected()) return;
         if (!validate()) return;
         CommunicationMessage cm = new CommunicationMessage(MessageType.LOGIN,
                 String.format("{\"phone_number\": \"%s\", \"password\": \"%s\"}",

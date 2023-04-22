@@ -8,6 +8,7 @@ import java.io.*;
 import java.net.Socket;
 
 public class Network {
+    private static Network instance;
     private Socket socket;
     private BufferedReader reader;
     private BufferedWriter writer;
@@ -15,6 +16,10 @@ public class Network {
     private ObjectInputStream inputStream;
 
     public Network(String address, int port) {
+        connect(address, port);
+    }
+
+    public void connect(String address, int port) {
         try {
             this.socket = new Socket(address, port);
             this.reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
@@ -22,11 +27,22 @@ public class Network {
             outputStream = new ObjectOutputStream(socket.getOutputStream());
             inputStream = new ObjectInputStream(socket.getInputStream());
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("[ERROR] Couldn't connect to server");
         }
     }
 
+    public boolean isConnected() {
+        if (this.socket == null) {
+            return false;
+        }
+        return this.socket.isConnected();
+    }
+
     public void sendMessage(CommunicationMessage message) {
+        if (!isConnected()) {
+            System.err.println("[ERROR] No connection with server");
+            return;
+        }
         try {
             outputStream.writeObject(message);
             outputStream.flush();
@@ -37,6 +53,10 @@ public class Network {
     }
 
     public CommunicationMessage listen() {
+        if (!isConnected()) {
+            System.err.println("[ERROR] No connection with server");
+            return null;
+        }
         CommunicationMessage res;
         try {
             res = (CommunicationMessage)inputStream.readObject();
@@ -47,6 +67,10 @@ public class Network {
     }
 
     public void stopConnection() {
+        if (!isConnected()) {
+            System.err.println("[ERROR] No connection with server");
+            return;
+        }
         try {
             reader.close();
             writer.close();
@@ -57,7 +81,7 @@ public class Network {
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         Network network = new Network("localhost", 1234);
         String data = "";
         CommunicationMessage message = new CommunicationMessage(MessageType.LOGIN, data);

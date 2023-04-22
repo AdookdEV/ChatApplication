@@ -39,17 +39,19 @@ public class RegistrationController implements Initializable {
     @FXML
     private Label regErrorLabel;
 
-    private final Network network = new Network("localhost", 1234);
+    private Network network;
     private final ObjectMapper jsonMapper = new ObjectMapper();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         regErrorLabel.setVisible(false);
+        network = new Network("localhost", 1234);
     }
 
     @FXML
     public void signUp(ActionEvent event) throws IOException {
         CustomAnimation.buttonClick(loginButton);
+        if (!network.isConnected()) return;
         if (!validate()) return;
         // Converts data to json
         String userData = jsonMapper.writeValueAsString(new UserModel(
