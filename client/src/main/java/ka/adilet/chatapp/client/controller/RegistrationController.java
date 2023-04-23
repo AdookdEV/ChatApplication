@@ -21,6 +21,7 @@ import ka.adilet.chatapp.communication.MessageType;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Properties;
 import java.util.ResourceBundle;
 
 public class RegistrationController implements Initializable {
@@ -41,6 +42,7 @@ public class RegistrationController implements Initializable {
 
     private Network network;
     private final ObjectMapper jsonMapper = new ObjectMapper();
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {

@@ -1,5 +1,6 @@
 package ka.adilet.chatapp.client.controller;
 
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
@@ -11,6 +12,7 @@ import javafx.scene.layout.GridPane;
 import ka.adilet.chatapp.client.model.ChatModel;
 import ka.adilet.chatapp.client.model.UserModel;
 import ka.adilet.chatapp.client.network.Network;
+import ka.adilet.chatapp.client.utils.Context;
 
 
 public class ChatController {
@@ -31,12 +33,9 @@ public class ChatController {
 
     @FXML
     public void initialize() {
+        network = new Network("localhost", 1234);
         chatListView = chatListSectionController.getChatListView();
-        ObservableList<ChatModel> chatModels = FXCollections.observableArrayList();
-        for (int i = 0; i < 3; i++) {
-            chatModels.add(new ChatModel());
-        }
-        chatListView.setItems(chatModels);
+        chatListView.setItems(Context.getChatModels());
         isChatSelected.bind(chatListView.getSelectionModel().selectedItemProperty().isNotNull());
         isChatSelected.addListener((observable, oldValue, newValue) -> {
             chattingSection.setVisible(newValue);
@@ -46,8 +45,7 @@ public class ChatController {
             chattingSectionController.switchChat(newValue);
         }));
         chatListView.getSelectionModel().clearSelection();
-
         chattingSection.setVisible(false);
-        chattingSectionController.setUserModel(new UserModel());
+        chattingSectionController.setUserModel(Context.getUserModel());
     }
 }

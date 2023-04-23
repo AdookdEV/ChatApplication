@@ -25,7 +25,6 @@ public class ScreenSwitcher {
             scene.setRoot(root);
         } catch (IOException e) {
             System.err.println(e);
-//            throw new RuntimeException(e);
         }
     }
 }

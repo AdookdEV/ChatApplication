@@ -8,11 +8,15 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import ka.adilet.chatapp.client.model.ChatModel;
+import ka.adilet.chatapp.client.model.UserModel;
 import ka.adilet.chatapp.client.network.Network;
+import ka.adilet.chatapp.client.utils.Context;
 import ka.adilet.chatapp.client.utils.Screen;
 import ka.adilet.chatapp.client.utils.ScreenSwitcher;
 import ka.adilet.chatapp.client.view.CustomAnimation;
@@ -61,13 +65,17 @@ public class LoginController implements Initializable {
         };
         task.setOnSucceeded((e) -> {
             try {
-                JsonNode node = jsonMapper.readTree(task.getValue().getBody());
-                if (node.get("result").asText().equals("OK")) {
+                JsonNode response = jsonMapper.readTree(task.getValue().getBody());
+                if (response.get("result").asText().equals("OK")) {
+                    Context.setUserModel(jsonMapper.readValue(response.get("user").toString(), UserModel.class));
+                    for (JsonNode chat : response.get("chats")) {
+                        Context.getChatModels().add(jsonMapper.readValue(chat.toString(), ChatModel.class));
+                    }
                     ScreenSwitcher.switchTo(Screen.CHAT);
                 }
                 else {
                     loginErrorLabel.setVisible(true);
-                    loginErrorLabel.setText(node.get("result").asText());
+                    loginErrorLabel.setText(response.get("result").asText());
                 }
             } catch (JsonProcessingException ex) {
                 throw new RuntimeException(ex);

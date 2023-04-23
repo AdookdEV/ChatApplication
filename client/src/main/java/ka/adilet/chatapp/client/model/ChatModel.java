@@ -1,6 +1,10 @@
 package ka.adilet.chatapp.client.model;
 
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
+
 import java.util.ArrayList;
 
 
@@ -20,6 +24,18 @@ public class ChatModel {
         for (int i = 0; i < 10; i++) {
             messageModels.add(new MessageModel());
         }
+    }
+
+    public ChatModel(Long chatRoomId,
+                     String chatName,
+                     ArrayList<MessageModel> messageModels,
+                     String avatarImageName,
+                     Boolean isPrivateChat) {
+        this.chatRoomId = chatRoomId;
+        this.chatName = chatName;
+        this.messageModels = messageModels;
+        this.avatarImageName = avatarImageName;
+        this.isPrivateChat = isPrivateChat;
     }
 
     public Long getChatRoomId() {
@@ -46,18 +62,22 @@ public class ChatModel {
         return isPrivateChat;
     }
 
+    @JsonSetter("id")
     public void setChatRoomId(Long chatRoomId) {
         this.chatRoomId = chatRoomId;
     }
 
+    @JsonSetter("messages")
     public void setMessageModels(ArrayList<MessageModel> messageModels) {
         this.messageModels = messageModels;
     }
 
+    @JsonSetter("is_private")
     public void setPrivateChat(Boolean aPrivate) {
         isPrivateChat = aPrivate;
     }
 
+    @JsonSetter("name")
     public void setChatName(String chatName) {
         this.chatName = chatName;
     }
