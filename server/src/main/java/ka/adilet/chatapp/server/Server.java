@@ -5,8 +5,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.sql.*;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -182,7 +188,34 @@ public class Server {
 
         private void handleChat(CommunicationMessage cm) {
             System.out.printf("%s: chat request\n", getName());
-            System.out.println(cm.getBody());
+            try {
+                ObjectNode messageNode = (ObjectNode) jsonMapper.readTree(cm.getBody());
+                saveChatMessageToDB(messageNode);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        private void saveChatMessageToDB(ObjectNode messageNode) throws SQLException {
+            PreparedStatement pstmt = conn.prepareStatement(
+                    "INSERT INTO \"Message\" " +
+                            "(content, sender_id, chat_room_id, sent_time) " +
+                            "VALUES (?, ?, ?, ?)");
+            pstmt.setString(1, messageNode.get("content").asText());
+            pstmt.setLong(2, messageNode.get("sender_id").asLong());
+            pstmt.setLong(3, messageNode.get("chat_room_id").asLong());
+            pstmt.setTimestamp(4, convertStrDate(messageNode.get("sent_time").asText()));
+            pstmt.executeUpdate();
+        }
+
+        private Timestamp convertStrDate(String date) {
+            try {
+                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                return new Timestamp(dateFormat.parse(date).getTime());
+            } catch (ParseException e) {
+                System.err.println(e);
+                return null;
+            }
         }
 
         private void addUserToDB(String data) {
