@@ -34,6 +34,7 @@ public class ChatController {
     @FXML
     public void initialize() {
         network = new Network("localhost", 1234);
+        chattingSectionController.setNetwork(network);
         chatListView = chatListSectionController.getChatListView();
         chatListView.setItems(Context.getChatModels());
         isChatSelected.bind(chatListView.getSelectionModel().selectedItemProperty().isNotNull());

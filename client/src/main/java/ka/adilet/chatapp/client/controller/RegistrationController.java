@@ -3,6 +3,7 @@ package ka.adilet.chatapp.client.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -56,6 +57,7 @@ public class RegistrationController implements Initializable {
         if (!network.isConnected()) return;
         if (!validate()) return;
         // Converts data to json
+        ObjectNode userNode = jsonMapper.createObjectNode();
         String userData = jsonMapper.writeValueAsString(new UserModel(
                 null,
                 nameTextField.getText(),
@@ -63,7 +65,9 @@ public class RegistrationController implements Initializable {
                 phoneTextField.getText(),
                 passwordTextField.getText()
         ));
-        network.sendMessage(new CommunicationMessage(MessageType.REGISTER, userData));
+        userNode.put("phone_number", phoneTextField.getText());
+        userNode.put("password", passwordTextField.getText());
+        network.sendMessage(new CommunicationMessage(MessageType.REGISTER, userNode.toString()));
         Task<CommunicationMessage> task = new Task<>() {
             @Override
             protected CommunicationMessage call() throws Exception {

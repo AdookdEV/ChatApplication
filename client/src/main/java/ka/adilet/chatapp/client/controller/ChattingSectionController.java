@@ -1,5 +1,8 @@
 package ka.adilet.chatapp.client.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javafx.collections.ListChangeListener;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -18,15 +21,21 @@ import javafx.scene.layout.VBox;
 import ka.adilet.chatapp.client.model.ChatModel;
 import ka.adilet.chatapp.client.model.MessageModel;
 import ka.adilet.chatapp.client.model.UserModel;
+import ka.adilet.chatapp.client.network.Network;
 import ka.adilet.chatapp.client.view.ChatMessageView;
+import ka.adilet.chatapp.communication.CommunicationMessage;
+import ka.adilet.chatapp.communication.MessageType;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ChattingSectionController {
     private ChatModel chatModel;
-    private HashMap<Integer, ArrayList<ChatMessageView>> cacheOfMessageViews;
     private UserModel userModel;
+    private Network network;
+    private ObjectMapper jsonMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @FXML
     private Button sendMessageButton;
@@ -65,6 +74,7 @@ public class ChattingSectionController {
         });
     }
 
+
     public void switchChat(ChatModel chatModel) {
         this.chatModel = chatModel;
         scrollPane.lookup(".increment-button").setStyle("visibility: false");
@@ -77,16 +87,25 @@ public class ChattingSectionController {
 
     private void sendMessage() {
         String messageContent = messageTextField.getText();
-        messageTextField.clear();
         if (messageContent.length() == 0) return;
         MessageModel currMessage = new MessageModel(
-                userModel.getId(),
                 chatModel.getChatRoomId(),
+                userModel.getId(),
                 messageContent,
-                "12:00"
+                LocalDateTime.now()
         );
         currMessage.setContent(messageContent);
         chatModel.addMessage(currMessage);
+        try {
+            network.sendMessage(new CommunicationMessage(
+                    MessageType.CHAT,
+                    jsonMapper.writeValueAsString(currMessage)
+            ));
+        } catch (JsonProcessingException e) {
+            System.err.println(e);
+            return;
+        }
+        messageTextField.clear();
         messagesContainer.getChildren().add(
                 new ChatMessageView("img/avatar.png", currMessage.getContent(), false));
     }
@@ -105,7 +124,7 @@ public class ChattingSectionController {
                 ArrayList<Pane> messageViews = new ArrayList<>();
                 for (MessageModel messageModel : chatModel.getMessageModels()) {
                     Pane chatMessageView  = new ChatMessageView("img/avatar.png", messageModel.getContent(),
-                            userModel.getId() == messageModel.getSenderId());
+                            userModel.getId() != messageModel.getSenderId());
                     messageViews.add(chatMessageView);
                 }
                 return messageViews;
@@ -118,4 +137,7 @@ public class ChattingSectionController {
     }
 
 
+    public void setNetwork(Network network) {
+        this.network = network;
+    }
 }

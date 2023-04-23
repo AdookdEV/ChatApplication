@@ -5,13 +5,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.sql.*;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import ka.adilet.chatapp.communication.CommunicationMessage;
 import ka.adilet.chatapp.communication.MessageType;
 
@@ -43,7 +43,7 @@ public class Server {
         private BufferedReader in;
         private ObjectInputStream inputStream;
         private ObjectOutputStream outputStream;
-        private final ObjectMapper jsonMapper = new ObjectMapper();
+        private final ObjectMapper jsonMapper = new ObjectMapper().registerModule(new JavaTimeModule());
         private final Connection conn;
 
         private static ConcurrentHashMap<Integer, ClientHandler> clients;
@@ -180,6 +180,11 @@ public class Server {
                     "{\"result\": \"OK\"}"));
         }
 
+        private void handleChat(CommunicationMessage cm) {
+            System.out.printf("%s: chat request\n", getName());
+            System.out.println(cm.getBody());
+        }
+
         private void addUserToDB(String data) {
             JsonNode user;
             Connection conn;
@@ -230,12 +235,12 @@ public class Server {
                         System.out.println("Client disconnected");
                         break;
                     }
-                    if (clientMessage.getType() == MessageType.LOGIN) {
-                        handleLogin(clientMessage);
+                    switch (clientMessage.getType()) {
+                        case LOGIN -> handleLogin(clientMessage);
+                        case REGISTER -> handleRegister(clientMessage);
+                        case CHAT -> handleChat(clientMessage);
                     }
-                    else if (clientMessage.getType() == MessageType.REGISTER) {
-                        handleRegister(clientMessage);
-                    }
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();

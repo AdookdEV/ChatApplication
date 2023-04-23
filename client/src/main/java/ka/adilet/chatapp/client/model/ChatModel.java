@@ -12,6 +12,7 @@ public class ChatModel {
     private Long chatRoomId;
     private String chatName;
     private ArrayList<MessageModel> messageModels;
+    @JsonIgnore
     private String avatarImageName;
     private Boolean isPrivateChat;
 
@@ -38,10 +39,11 @@ public class ChatModel {
         this.isPrivateChat = isPrivateChat;
     }
 
+    @JsonGetter("id")
     public Long getChatRoomId() {
         return chatRoomId;
     }
-
+    @JsonGetter("messages")
     public ArrayList<MessageModel> getMessageModels() {
         return messageModels;
     }
@@ -49,7 +51,7 @@ public class ChatModel {
     public MessageModel getLastMessage() {
         return messageModels.get(0);
     }
-
+    @JsonGetter("name")
     public String getChatName() {
         return chatName;
     }
@@ -58,6 +60,7 @@ public class ChatModel {
         return avatarImageName;
     }
 
+    @JsonGetter("is_private")
     public Boolean isPrivateChat() {
         return isPrivateChat;
     }
@@ -66,8 +69,7 @@ public class ChatModel {
     public void setChatRoomId(Long chatRoomId) {
         this.chatRoomId = chatRoomId;
     }
-
-    @JsonSetter("messages")
+    @JsonGetter("messages")
     public void setMessageModels(ArrayList<MessageModel> messageModels) {
         this.messageModels = messageModels;
     }

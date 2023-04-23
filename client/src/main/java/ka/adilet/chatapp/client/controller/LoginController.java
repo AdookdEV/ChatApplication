@@ -4,6 +4,7 @@ package ka.adilet.chatapp.client.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -40,7 +41,7 @@ public class LoginController implements Initializable {
     private TextField passwordTextField;
 
     private Network network;
-    private final ObjectMapper jsonMapper = new ObjectMapper();
+    private final ObjectMapper jsonMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
