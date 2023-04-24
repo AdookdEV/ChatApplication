@@ -81,7 +81,7 @@ public class ChattingSectionController {
             MessageModel messageModel = chatMessages.get(size - 1);
             Pane chatMessageView  = new ChatMessageView("img/avatar.png",
                     messageModel.getContent(),
-                    userModel.getName(),
+                    messageModel.getSenderName(),
                     messageModel.getSentTime().toString(),
                     userModel.getId() != messageModel.getSenderId(),
                     false);
@@ -106,6 +106,7 @@ public class ChattingSectionController {
         MessageModel currMessage = new MessageModel(
                 chatModel.getChatRoomId(),
                 userModel.getId(),
+                userModel.getName() + " " + userModel.getSurname(),
                 messageContent,
                 LocalDateTime.now()
         );
@@ -123,9 +124,9 @@ public class ChattingSectionController {
         messageTextField.clear();
         messagesContainer.getChildren().add(
                 new ChatMessageView("img/avatar.png", messageContent,
-                userModel.getName(),
-                LocalDateTime.now().toString(),
-                false,
+                        currMessage.getSenderName(),
+                        LocalDateTime.now().toString(),
+                        false,
                 false));
     }
 
@@ -144,7 +145,7 @@ public class ChattingSectionController {
                 for (MessageModel messageModel : chatModel.getMessageModels()) {
                     Pane chatMessageView  = new ChatMessageView("img/avatar.png",
                             messageModel.getContent(),
-                            userModel.getName(),
+                            messageModel.getSenderName(),
                             messageModel.getSentTime().toString(),
                             userModel.getId() != messageModel.getSenderId(),
                             false);

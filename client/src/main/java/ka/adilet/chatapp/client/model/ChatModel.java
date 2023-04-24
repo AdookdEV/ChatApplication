@@ -1,9 +1,7 @@
 package ka.adilet.chatapp.client.model;
 
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.*;
 
 import java.util.ArrayList;
 
@@ -12,31 +10,28 @@ public class ChatModel {
     private Long chatRoomId;
     private String chatName;
     private ArrayList<MessageModel> messageModels;
-    @JsonIgnore
     private String avatarImageName;
     private Boolean isPrivateChat;
 
-    public ChatModel() {
-        this.avatarImageName = "img/avatar.png";
-        this.isPrivateChat = false;
-        this.chatRoomId = 0L;
-        this.chatName = "Chat name";
-        this.messageModels = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            messageModels.add(new MessageModel());
-        }
-    }
-
-    public ChatModel(Long chatRoomId,
-                     String chatName,
-                     ArrayList<MessageModel> messageModels,
-                     String avatarImageName,
-                     Boolean isPrivateChat) {
+//    public ChatModel() {
+//        this.avatarImageName = "img/avatar.png";
+//        this.isPrivateChat = false;
+//        this.chatRoomId = 0L;
+//        this.chatName = "Chat name";
+//    }
+    @JsonCreator
+    public ChatModel(@JsonProperty("id") Long chatRoomId,
+                     @JsonProperty("name") String chatName,
+                     @JsonProperty("messages") ArrayList<MessageModel> messageModels,
+                     @JsonProperty("is_private") Boolean isPrivateChat) {
         this.chatRoomId = chatRoomId;
         this.chatName = chatName;
         this.messageModels = messageModels;
-        this.avatarImageName = avatarImageName;
+        this.avatarImageName = "img/avatar.png";
         this.isPrivateChat = isPrivateChat;
+        if (messageModels == null) {
+            this.messageModels = new ArrayList<>();
+        }
     }
 
     @JsonGetter("id")

@@ -145,7 +145,20 @@ public class Server {
 
         private ArrayNode getMessagesByChatId(Long chatId) throws SQLException {
             Statement st = conn.createStatement();
-            return getAsArrayNode(st.executeQuery("SELECT * FROM \"Message\" WHERE chat_room_id = " + chatId));
+            String sql = String.format(
+                    "SELECT\n" +
+                            "    m.id as id,\n" +
+                            "content," +
+                            "    sender_id,\n" +
+                            "    chat_room_id,\n" +
+                            "    sent_time,\n" +
+                            "    concat(u.name, ' ', u.surname) as sender_name\n" +
+                            "FROM \"Message\" m INNER JOIN \"User\" u\n" +
+                            "         ON m.sender_id = u.id\n" +
+                            "         WHERE chat_room_id = %d;",
+                    chatId
+            );
+            return getAsArrayNode(st.executeQuery(sql));
         }
 
         private ResultSet getUserData(String phoneNumber) throws SQLException {
@@ -234,6 +247,7 @@ public class Server {
                     if (!clients.containsKey(userId)) continue;
                     if (clients.get(userId) == this) continue;
                     System.out.println("User id: " + userId);
+                    messageNode.put("sender_name", user.get("name").asText() + " " + user.get("surname").asText()); //
                     clients.get(userId).sendMessage(new CommunicationMessage(
                             MessageType.CHAT,
                             messageNode.toString()
