@@ -64,8 +64,8 @@ public class ChatController {
                 CommunicationMessage reponse;
                 while ((reponse = network.listen()) != null) {
                     System.out.println("listening for server...");
+                    System.out.println("[SERVER] " + reponse.getBody());
                     MessageModel message = jsonMapper.readValue(reponse.getBody(), MessageModel.class);
-                    System.out.printf("[SERVER] %s\n", message.getContent());
                     Platform.runLater(() -> {
                         chattingSectionController.addChatMessage(message);
                     });

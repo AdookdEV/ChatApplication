@@ -247,7 +247,6 @@ public class Server {
                     if (!clients.containsKey(userId)) continue;
                     if (clients.get(userId) == this) continue;
                     System.out.println("User id: " + userId);
-                    messageNode.put("sender_name", user.get("name").asText() + " " + user.get("surname").asText()); //
                     clients.get(userId).sendMessage(new CommunicationMessage(
                             MessageType.CHAT,
                             messageNode.toString()
