@@ -60,7 +60,9 @@ public class ChatListController {
                 setText(null);
                 setGraphic(null);
             } else {
-                lastMessageLabel.setText(item.getLastMessage().getContent());
+                if (item.getLastMessage() != null) {
+                    lastMessageLabel.setText(item.getLastMessage().getContent());
+                }
                 chatNameLabel.setText(item.getChatName());
                 Image avatarImage = new Image(ChatApplication.class.getResourceAsStream(item.getAvatarImageName()));
                 avatarImageView.setImage(avatarImage);

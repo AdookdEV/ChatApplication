@@ -14,6 +14,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import ka.adilet.chatapp.client.model.UserModel;
 import ka.adilet.chatapp.client.network.Network;
+import ka.adilet.chatapp.client.utils.Context;
 import ka.adilet.chatapp.client.utils.Screen;
 import ka.adilet.chatapp.client.utils.ScreenSwitcher;
 import ka.adilet.chatapp.client.view.CustomAnimation;
@@ -41,14 +42,12 @@ public class RegistrationController implements Initializable {
     @FXML
     private Label regErrorLabel;
 
-    private Network network;
+    private Network network = Context.getNetwork();
     private final ObjectMapper jsonMapper = new ObjectMapper();
-
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         regErrorLabel.setVisible(false);
-        network = new Network("localhost", 1234);
     }
 
     @FXML
@@ -56,8 +55,6 @@ public class RegistrationController implements Initializable {
         CustomAnimation.buttonClick(loginButton);
         if (!network.isConnected()) return;
         if (!validate()) return;
-        // Converts data to json
-        ObjectNode userNode = jsonMapper.createObjectNode();
         String userData = jsonMapper.writeValueAsString(new UserModel(
                 null,
                 nameTextField.getText(),
@@ -65,9 +62,7 @@ public class RegistrationController implements Initializable {
                 phoneTextField.getText(),
                 passwordTextField.getText()
         ));
-        userNode.put("phone_number", phoneTextField.getText());
-        userNode.put("password", passwordTextField.getText());
-        network.sendMessage(new CommunicationMessage(MessageType.REGISTER, userNode.toString()));
+        network.sendMessage(new CommunicationMessage(MessageType.REGISTER, userData.toString()));
         Task<CommunicationMessage> task = new Task<>() {
             @Override
             protected CommunicationMessage call() throws Exception {

@@ -29,6 +29,7 @@ public class Server {
 
     private ServerSocket socket;
     private boolean isRunning = true;
+    private static ConcurrentHashMap<Long, ClientHandler> clients = new ConcurrentHashMap<>();
 
     public void start(int port) throws IOException, ClassNotFoundException {
         Class.forName("org.postgresql.Driver");
@@ -51,8 +52,7 @@ public class Server {
         private ObjectOutputStream outputStream;
         private final ObjectMapper jsonMapper = new ObjectMapper().registerModule(new JavaTimeModule());
         private final Connection conn;
-
-        private static ConcurrentHashMap<Integer, ClientHandler> clients;
+        private Long client_id;
 
         public ClientHandler(Socket socket) {
             try {
@@ -87,30 +87,6 @@ public class Server {
                 outputStream.flush();
             } catch (IOException e) {
                 e.printStackTrace();
-            }
-        }
-
-        private void handleLogin(CommunicationMessage cm) {
-            System.out.printf("%s: login request\n", getName());
-            try {
-                String password = jsonMapper.readTree(cm.getBody()).get("password").asText();
-                String phoneNumber = jsonMapper.readTree(cm.getBody()).get("phone_number").asText();
-                ArrayNode users = getAsArrayNode(getUserData(phoneNumber));
-                ObjectNode userNode = (users == null) ? null : (ObjectNode)users.get(0);
-                if (!validateUserData(userNode, password)) return;
-                ObjectNode response = jsonMapper.createObjectNode();
-                response.put("result", "OK");
-                response.set("user", userNode);
-                response.set("chats", getChatsByUserId(userNode.get("id").asLong()));
-
-                sendMessage(new CommunicationMessage(
-                        MessageType.AUTHORIZATION_RESULT,
-                        response.toString()));
-            } catch (Exception e) {
-                sendMessage(new CommunicationMessage(
-                        MessageType.AUTHORIZATION_RESULT,
-                        "{\"result\": \"server error\"}"));
-                throw new RuntimeException(e);
             }
         }
 
@@ -178,21 +154,13 @@ public class Server {
                     String.format(String.format("select * from \"User\" where \"phone_number\"='%s'", phoneNumber)));
         }
 
-        private void handleRegister(CommunicationMessage cm) {
-            System.out.printf("%s: register request\n", getName());
-            addUserToDB(cm.getBody());
-            sendMessage(new CommunicationMessage(
-                    MessageType.AUTHORIZATION_RESULT,
-                    "{\"result\": \"OK\"}"));
-        }
-
-        private void handleChat(CommunicationMessage cm) {
-            System.out.printf("%s: chat request\n", getName());
+        private Timestamp convertStrDate(String date) {
             try {
-                ObjectNode messageNode = (ObjectNode) jsonMapper.readTree(cm.getBody());
-                saveChatMessageToDB(messageNode);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                return new Timestamp(dateFormat.parse(date).getTime());
+            } catch (ParseException e) {
+                System.err.println(e);
+                return null;
             }
         }
 
@@ -208,21 +176,12 @@ public class Server {
             pstmt.executeUpdate();
         }
 
-        private Timestamp convertStrDate(String date) {
-            try {
-                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                return new Timestamp(dateFormat.parse(date).getTime());
-            } catch (ParseException e) {
-                System.err.println(e);
-                return null;
-            }
-        }
-
         private void addUserToDB(String data) {
             JsonNode user;
             Connection conn;
             try {
                 user = jsonMapper.readTree(data);
+                System.out.println(user);
                 conn = DriverManager.getConnection(DB_URL + DB_NAME, DB_USERNAME, DB_PASSWORD);
                 // Check if the user has already registered;
                 Statement selectStmt = conn.createStatement();
@@ -256,6 +215,79 @@ public class Server {
             }
         }
 
+        private void deliverChatMessage(ObjectNode messageNode) {
+            Long chatRoomId = messageNode.get("chat_room_id").asLong();
+            String sql = String.format(
+                    "SELECT\n" +
+                            "    id, name, surname\n" +
+                            "FROM\n" +
+                            "    \"User\"\n" +
+                            "WHERE\n" +
+                            "    id in (SELECT member_id FROM \"ChatRoomMember\" WHERE chat_room_id = %d);",
+                    chatRoomId
+                    );
+            try {
+                ArrayNode users =  getAsArrayNode(conn.prepareStatement(sql).executeQuery());
+                System.out.println("Active clients count: " + clients.size() + ": ");
+                for (JsonNode user : users) {
+                    Long userId = user.get("id").asLong();
+                    if (!clients.containsKey(userId)) continue;
+                    if (clients.get(userId) == this) continue;
+                    System.out.println("User id: " + userId);
+                    clients.get(userId).sendMessage(new CommunicationMessage(
+                            MessageType.CHAT,
+                            messageNode.toString()
+                    ));
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        private void handleRegister(CommunicationMessage cm) {
+            System.out.printf("%s: register request\n", getName());
+            addUserToDB(cm.getBody());
+            sendMessage(new CommunicationMessage(
+                    MessageType.AUTHORIZATION_RESULT,
+                    "{\"result\": \"OK\"}"));
+        }
+
+        private void handleChat(CommunicationMessage cm) {
+            System.out.printf("%s: chat request from %d\n", getName(), this.client_id);
+            try {
+                ObjectNode messageNode = (ObjectNode) jsonMapper.readTree(cm.getBody());
+                saveChatMessageToDB(messageNode);
+                deliverChatMessage(messageNode);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        private void handleLogin(CommunicationMessage cm) {
+            System.out.printf("%s: login request\n", getName());
+            try {
+                String password = jsonMapper.readTree(cm.getBody()).get("password").asText();
+                String phoneNumber = jsonMapper.readTree(cm.getBody()).get("phone_number").asText();
+                ArrayNode users = getAsArrayNode(getUserData(phoneNumber));
+                ObjectNode userNode = (users == null) ? null : (ObjectNode)users.get(0);
+                if (!validateUserData(userNode, password)) return;
+                ObjectNode response = jsonMapper.createObjectNode();
+                response.put("result", "OK");
+                response.set("user", userNode);
+                response.set("chats", getChatsByUserId(userNode.get("id").asLong()));
+                clients.put(userNode.get("id").asLong(), this);
+                this.client_id = userNode.get("id").asLong();
+                sendMessage(new CommunicationMessage(
+                        MessageType.AUTHORIZATION_RESULT,
+                        response.toString()));
+            } catch (Exception e) {
+                sendMessage(new CommunicationMessage(
+                        MessageType.AUTHORIZATION_RESULT,
+                        "{\"result\": \"server error\"}"));
+                throw new RuntimeException(e);
+            }
+        }
+
         @Override
         public void run() {
             try {
@@ -265,7 +297,8 @@ public class Server {
                     try {
                         clientMessage = (CommunicationMessage)inputStream.readObject();
                     } catch (EOFException | SocketException e) {
-                        System.out.println("Client disconnected");
+                        System.out.printf("%s disconnected\n", getName());
+                        clients.remove(this.client_id);
                         break;
                     }
                     switch (clientMessage.getType()) {
@@ -273,7 +306,6 @@ public class Server {
                         case REGISTER -> handleRegister(clientMessage);
                         case CHAT -> handleChat(clientMessage);
                     }
-
                 }
             } catch (Exception e) {
                 e.printStackTrace();

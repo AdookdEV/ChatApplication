@@ -49,7 +49,9 @@ public class ChatModel {
     }
 
     public MessageModel getLastMessage() {
-        return messageModels.get(0);
+        return (this.messageModels.isEmpty())
+                ? null
+                : this.messageModels.get(this.messageModels.size() - 1);
     }
     @JsonGetter("name")
     public String getChatName() {
@@ -71,6 +73,10 @@ public class ChatModel {
     }
     @JsonGetter("messages")
     public void setMessageModels(ArrayList<MessageModel> messageModels) {
+        if (messageModels == null) {
+            this.messageModels = new ArrayList<>();
+            return;
+        }
         this.messageModels = messageModels;
     }
 

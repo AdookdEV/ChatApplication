@@ -59,9 +59,3 @@
 .link:focused {
     -fx-border-color: transparent;
 }
-
-.message-label {
-    -fx-background-color: #33393F;
-    -fx-background-radius: 10;
-    -fx-padding: 7 10 7 10;
-}

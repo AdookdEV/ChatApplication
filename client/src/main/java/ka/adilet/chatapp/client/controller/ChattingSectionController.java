@@ -3,7 +3,9 @@ package ka.adilet.chatapp.client.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -36,6 +38,7 @@ public class ChattingSectionController {
     private UserModel userModel;
     private Network network;
     private ObjectMapper jsonMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private ObservableList<MessageModel> chatMessages = FXCollections.observableArrayList();
 
     @FXML
     private Button sendMessageButton;
@@ -72,8 +75,20 @@ public class ChattingSectionController {
                 scrollPane.setVvalue(scrollPane.getVmax());
             }
         });
+        chatMessages.addListener((ListChangeListener<? super MessageModel>) (observable) -> {
+            if (!observable.next()) return;
+            int size = chatMessages.size();
+            MessageModel messageModel = chatMessages.get(size - 1);
+            Pane chatMessageView  = new ChatMessageView("img/avatar.png",
+                    messageModel.getContent(),
+                    userModel.getName(),
+                    messageModel.getSentTime().toString(),
+                    userModel.getId() != messageModel.getSenderId(),
+                    false);
+            messagesContainer.getChildren().add(chatMessageView);
+            messagesContainer.layout();
+        });
     }
-
 
     public void switchChat(ChatModel chatModel) {
         this.chatModel = chatModel;
@@ -107,7 +122,11 @@ public class ChattingSectionController {
         }
         messageTextField.clear();
         messagesContainer.getChildren().add(
-                new ChatMessageView("img/avatar.png", currMessage.getContent(), false));
+                new ChatMessageView("img/avatar.png", messageContent,
+                userModel.getName(),
+                LocalDateTime.now().toString(),
+                false,
+                false));
     }
 
     private void updateView() {
@@ -123,8 +142,12 @@ public class ChattingSectionController {
             protected ArrayList<Pane> call() {
                 ArrayList<Pane> messageViews = new ArrayList<>();
                 for (MessageModel messageModel : chatModel.getMessageModels()) {
-                    Pane chatMessageView  = new ChatMessageView("img/avatar.png", messageModel.getContent(),
-                            userModel.getId() != messageModel.getSenderId());
+                    Pane chatMessageView  = new ChatMessageView("img/avatar.png",
+                            messageModel.getContent(),
+                            userModel.getName(),
+                            messageModel.getSentTime().toString(),
+                            userModel.getId() != messageModel.getSenderId(),
+                            false);
                     messageViews.add(chatMessageView);
                 }
                 return messageViews;
@@ -136,8 +159,17 @@ public class ChattingSectionController {
         });
     }
 
+    public ChatModel getChatModel() {
+        return chatModel;
+    }
+
+    public void addChatMessage(MessageModel messageModel) {
+        chatModel.getMessageModels().add(messageModel);
+        chatMessages.add(messageModel);
+    }
 
     public void setNetwork(Network network) {
         this.network = network;
     }
+
 }

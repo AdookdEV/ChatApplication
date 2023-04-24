@@ -15,3 +15,9 @@
     -fx-text-fill: white;
     -fx-font-size: 1.1em;
 }
+
+.message-label {
+    -fx-background-color: #33393F;
+    -fx-background-radius: 10;
+    -fx-padding: 5 10 5 10;
+}

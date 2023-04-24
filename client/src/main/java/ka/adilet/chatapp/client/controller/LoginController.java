@@ -40,13 +40,12 @@ public class LoginController implements Initializable {
     @FXML
     private TextField passwordTextField;
 
-    private Network network;
+    private Network network = Context.getNetwork();
     private final ObjectMapper jsonMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         loginErrorLabel.setVisible(false);
-        network = new Network("localhost", 1234);
     }
 
     @FXML
