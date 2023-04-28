@@ -14,7 +14,7 @@ public class MessageModel {
     private String content;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime sentTime;
-    private Map<String, String> unrecognizedFields = new HashMap<>();
+    private final Map<String, String> unrecognizedFields = new HashMap<>();
 
     @JsonCreator
     public MessageModel(@JsonProperty("chat_room_id")long chatRoomId,

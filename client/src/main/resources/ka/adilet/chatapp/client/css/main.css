@@ -43,3 +43,24 @@
     -fx-padding: 0;
     visibility: false;
 }
+
+.list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+}
+
+.list-cell:hover {
+    -fx-background-color: #4A555E;
+}
+
+.list-cell:empty {
+    -fx-background-color: transparent;
+}
+
+.list-cell:focused {
+    -fx-background-color: #30AB9B;
+}
+
+.list-view:focused {
+    -fx-background-insets: 0;
+}

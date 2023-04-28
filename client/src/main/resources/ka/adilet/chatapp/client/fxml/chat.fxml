@@ -1,26 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.JFXButton?>
 <?import java.net.URL?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
-<GridPane fx:id="root" hgap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" pickOnBounds="false" prefHeight="600.0" prefWidth="900.0" styleClass="background-color" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ka.adilet.chatapp.client.controller.ChatController">
-  <columnConstraints>
-    <ColumnConstraints hgrow="SOMETIMES" percentWidth="30.0" />
-    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-  </columnConstraints>
-  <rowConstraints>
-    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-  </rowConstraints>
+<StackPane xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ka.adilet.chatapp.client.controller.ChatController">
    <children>
-      <Label alignment="CENTER" styleClass="choose-chat_label" text="Select a chat to start messaging" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
-      <fx:include fx:id="chatListSection" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" source="chat-list-section.fxml" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" />
-      <fx:include fx:id="chattingSection" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" source="chatting-section.fxml" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" />
+      <GridPane fx:id="root" hgap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" pickOnBounds="false" prefHeight="600.0" prefWidth="900.0" styleClass="background-color">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" percentWidth="30.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Label alignment="CENTER" styleClass="choose-chat_label" text="Select a chat to start messaging" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+            <fx:include fx:id="chatListSection" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" source="chat-list-section.fxml" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" />
+            <fx:include fx:id="chattingSection" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" source="chatting-section.fxml" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" />
+         </children>
+         <stylesheets>
+            <URL value="@../css/chat-list-section.css" />
+            <URL value="@../css/main.css" />
+         </stylesheets>
+      </GridPane>
+      <Pane fx:id="shadowPane" disable="true" focusTraversable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseClicked="#closeNewChatDialog" opacity="0.5" style="-fx-background-color: black;" visible="false" />
+      <VBox id="new_chat_window_background" fx:id="newChatDialog" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="450.0" prefWidth="300.0" spacing="10.0" stylesheets="@../css/new-chat.css" visible="false">
+         <children>
+            <AnchorPane>
+               <children>
+                  <Label id="new_chat_header" maxWidth="1.7976931348623157E308" text="New chat" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <padding>
+                        <Insets top="5.0" />
+                     </padding>
+                  </Label>
+               </children>
+               <padding>
+                  <Insets left="10.0" right="10.0" />
+               </padding>
+            </AnchorPane>
+            <AnchorPane>
+               <children>
+                  <JFXButton id="new_group_button" maxWidth="1.7976931348623157E308" prefHeight="40.0" text="New group" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+               </children>
+               <padding>
+                  <Insets left="10.0" right="10.0" />
+               </padding>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </AnchorPane>
+            <AnchorPane VBox.vgrow="ALWAYS">
+               <children>
+                  <ListView fx:id="dialogListView" prefHeight="200.0" prefWidth="200.0" stylesheets="@../css/main.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+               </children>
+            </AnchorPane>
+         </children>
+         <padding>
+            <Insets top="5.0" />
+         </padding>
+      </VBox>
    </children>
-   <stylesheets>
-      <URL value="@../css/chat-list-section.css" />
-      <URL value="@../css/main.css" />
-   </stylesheets>
-</GridPane>
+</StackPane>

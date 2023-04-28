@@ -69,7 +69,9 @@ public class LoginController implements Initializable {
                 if (response.get("result").asText().equals("OK")) {
                     Context.setUserModel(jsonMapper.readValue(response.get("user").toString(), UserModel.class));
                     for (JsonNode chat : response.get("chats")) {
-                        Context.getChatModels().add(jsonMapper.readValue(chat.toString(), ChatModel.class));
+                        ChatModel chatModel = jsonMapper.readValue(chat.toString(), ChatModel.class);
+                        ChatModel.formatChatName(chatModel);
+                        Context.getChatModels().add(chatModel);
                     }
                     ScreenSwitcher.switchTo(Screen.CHAT);
                 }

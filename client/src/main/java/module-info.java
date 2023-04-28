@@ -5,6 +5,7 @@ module client {
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.datatype.jsr310;
+    requires com.jfoenix;
 
     opens ka.adilet.chatapp.client to javafx.fxml, javafx.controls;
     exports ka.adilet.chatapp.client;

@@ -1,0 +1,32 @@
+#new_chat_header {
+    -fx-text-fill: white;
+    -fx-font-size: 22;
+    -fx-font-weight: bold;
+}
+
+#new_chat_window_background {
+    -fx-background-color: #33393F;
+    -fx-background-radius: 7;
+}
+
+#new_group_button {
+    -fx-background-color: #2DA192;
+    -fx-text-fill: white;
+    -fx-font-size: 13;
+    -fx-font-weight: 700;
+    -fx-background-radius: 7;
+}
+
+.list-view:focused {
+    -fx-background-insets: 0;
+}
+
+.list-view {
+    -fx-background-insets: 0;
+    -fx-border-width: 0;
+    -fx-background-insets: 0;
+    -fx-background-color: #222528;
+    -fx-background-radius: 0 0 7 7;
+    -fx-padding: 5 0 5 0;
+}
+

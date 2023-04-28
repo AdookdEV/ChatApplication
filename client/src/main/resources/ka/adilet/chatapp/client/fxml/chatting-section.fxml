@@ -50,7 +50,7 @@
                </padding>
             </GridPane>
          </children></HBox>
-      <ScrollPane fx:id="scrollPane" fitToWidth="true" prefViewportHeight="1.0" vbarPolicy="ALWAYS" VBox.vgrow="ALWAYS">
+      <ScrollPane fx:id="scrollPane" fitToWidth="true" focusTraversable="false" prefViewportHeight="1.0" vbarPolicy="ALWAYS" VBox.vgrow="ALWAYS">
          <content>
             <VBox fx:id="messagesContainer" maxHeight="1.7976931348623157E308" spacing="6.0" styleClass="background-color">
                <padding>
@@ -72,7 +72,7 @@
                   <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                </rowConstraints>
                <children>
-                  <TextField fx:id="messageTextField" prefHeight="35.0" promptText="Type a message..." styleClass="message_text-field" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+                  <TextField fx:id="messageTextField" focusTraversable="false" prefHeight="35.0" promptText="Type a message..." styleClass="message_text-field" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
                </children>
             </GridPane>
             <GridPane>
@@ -83,7 +83,7 @@
                   <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                </rowConstraints>
                <children>
-                  <Button fx:id="sendMessageButton" mnemonicParsing="false" text="Send" />
+                  <Button fx:id="sendMessageButton" focusTraversable="false" mnemonicParsing="false" text="Send" />
                </children>
             </GridPane>
          </children>

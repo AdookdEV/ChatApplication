@@ -4,5 +4,7 @@ public enum MessageType {
     LOGIN,
     REGISTER,
     AUTHORIZATION_RESULT,
-    CHAT;
+    CHAT,
+    GET_USERS,
+    NEW_CHAT;
 }

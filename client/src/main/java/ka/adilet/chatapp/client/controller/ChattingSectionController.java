@@ -3,49 +3,40 @@ package ka.adilet.chatapp.client.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import javafx.collections.FXCollections;
+import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import ka.adilet.chatapp.client.model.ChatModel;
 import ka.adilet.chatapp.client.model.MessageModel;
 import ka.adilet.chatapp.client.model.UserModel;
 import ka.adilet.chatapp.client.network.Network;
+import ka.adilet.chatapp.client.utils.Context;
 import ka.adilet.chatapp.client.view.ChatMessageView;
 import ka.adilet.chatapp.communication.CommunicationMessage;
 import ka.adilet.chatapp.communication.MessageType;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class ChattingSectionController {
     private ChatModel chatModel;
     private UserModel userModel;
     private Network network;
-    private ObjectMapper jsonMapper = new ObjectMapper().registerModule(new JavaTimeModule());
-    private ObservableList<MessageModel> chatMessages = FXCollections.observableArrayList();
+    private final ObjectMapper jsonMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @FXML
     private Button sendMessageButton;
-    @FXML
-    private Parent root;
-    @FXML
-    private HBox topBar;
     @FXML
     private Label chatNameLabel;
     @FXML
@@ -64,30 +55,16 @@ public class ChattingSectionController {
                 sendMessage();
             }
         });
-        sendMessageButton.setOnAction((ActionEvent event) -> {
-            sendMessage();
+        sendMessageButton.setOnAction((ActionEvent event) -> sendMessage());
+        messagesContainer.getChildren().addListener((ListChangeListener<Node>) change -> {
+            scrollPane.applyCss();
+            scrollPane.layout();
+            scrollPane.setVvalue(scrollPane.getVmax());
         });
-        messagesContainer.getChildren().addListener(new ListChangeListener<Node>() {
-            @Override
-            public void onChanged(Change<? extends Node> change) {
-                scrollPane.applyCss();
-                scrollPane.layout();
-                scrollPane.setVvalue(scrollPane.getVmax());
-            }
-        });
-        chatMessages.addListener((ListChangeListener<? super MessageModel>) (observable) -> {
-            if (!observable.next()) return;
-            int size = chatMessages.size();
-            MessageModel messageModel = chatMessages.get(size - 1);
-            Pane chatMessageView  = new ChatMessageView("img/avatar.png",
-                    messageModel.getContent(),
-                    messageModel.getSenderName(),
-                    messageModel.getSentTime().toString(),
-                    userModel.getId() != messageModel.getSenderId(),
-                    false);
-            messagesContainer.getChildren().add(chatMessageView);
-            messagesContainer.layout();
-        });
+    }
+
+    public void setUserModel(UserModel userModel) {
+        this.userModel = userModel;
     }
 
     public void switchChat(ChatModel chatModel) {
@@ -96,13 +73,12 @@ public class ChattingSectionController {
         updateView();
     }
 
-    public void setUserModel(UserModel userModel) {
-        this.userModel = userModel;
-    }
-
     private void sendMessage() {
         String messageContent = messageTextField.getText();
         if (messageContent.length() == 0) return;
+        if (!Context.getChatModels().contains(this.chatModel)) {
+            Context.getChatModels().add(this.chatModel);
+        }
         MessageModel currMessage = new MessageModel(
                 chatModel.getChatRoomId(),
                 userModel.getId(),
@@ -110,7 +86,6 @@ public class ChattingSectionController {
                 messageContent,
                 LocalDateTime.now()
         );
-        currMessage.setContent(messageContent);
         chatModel.addMessage(currMessage);
         try {
             network.sendMessage(new CommunicationMessage(
@@ -118,16 +93,11 @@ public class ChattingSectionController {
                     jsonMapper.writeValueAsString(currMessage)
             ));
         } catch (JsonProcessingException e) {
-            System.err.println(e);
+            e.printStackTrace();
             return;
         }
         messageTextField.clear();
-        messagesContainer.getChildren().add(
-                new ChatMessageView("img/avatar.png", messageContent,
-                        currMessage.getSenderName(),
-                        LocalDateTime.now().toString(),
-                        false,
-                false));
+        addChatMessageView(currMessage);
     }
 
     private void updateView() {
@@ -137,13 +107,16 @@ public class ChattingSectionController {
         chatNameLabel.setText(chatModel.getChatName());
         messagesContainer.getChildren().clear();
         extraInfoLabel.setText("23 members");
+        if (chatModel.isPrivateChat()) {
+            extraInfoLabel.setText("last seen 5 minutes ago");
+        }
 
-        Task<ArrayList<Pane>> task = new Task<ArrayList<Pane>>() {
+        Task<ArrayList<Pane>> task = new Task<>() {
             @Override
             protected ArrayList<Pane> call() {
                 ArrayList<Pane> messageViews = new ArrayList<>();
                 for (MessageModel messageModel : chatModel.getMessageModels()) {
-                    Pane chatMessageView  = new ChatMessageView("img/avatar.png",
+                    Pane chatMessageView = new ChatMessageView("img/avatar.png",
                             messageModel.getContent(),
                             messageModel.getSenderName(),
                             messageModel.getSentTime().toString(),
@@ -155,18 +128,18 @@ public class ChattingSectionController {
             }
         };
         new Thread(task).start();
-        task.setOnSucceeded(event -> {
-            messagesContainer.getChildren().addAll(task.getValue());
-        });
+        task.setOnSucceeded(event -> messagesContainer.getChildren().addAll(task.getValue()));
     }
 
-    public ChatModel getChatModel() {
-        return chatModel;
-    }
-
-    public void addChatMessage(MessageModel messageModel) {
-        chatModel.getMessageModels().add(messageModel);
-        chatMessages.add(messageModel);
+    public void addChatMessageView(MessageModel messageModel) {
+        Pane chatMessageView  = new ChatMessageView("img/avatar.png",
+                messageModel.getContent(),
+                messageModel.getSenderName(),
+                messageModel.getSentTime().toString(),
+                userModel.getId() != messageModel.getSenderId(),
+                false);
+        messagesContainer.getChildren().add(chatMessageView);
+        messagesContainer.layout();
     }
 
     public void setNetwork(Network network) {

@@ -23,7 +23,6 @@ import ka.adilet.chatapp.communication.MessageType;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Properties;
 import java.util.ResourceBundle;
 
 public class RegistrationController implements Initializable {
@@ -79,7 +78,6 @@ public class RegistrationController implements Initializable {
                 throw new RuntimeException(ex);
             }
             if (res.get("result").asText().equals("OK")) {
-                network.stopConnection();
                 ScreenSwitcher.switchTo(Screen.LOGIN);
             } else {
                 regErrorLabel.setVisible(true);

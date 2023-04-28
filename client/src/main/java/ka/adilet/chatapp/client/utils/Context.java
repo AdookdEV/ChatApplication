@@ -12,10 +12,19 @@ public class Context {
     private static ObservableList<ChatModel> chatModels = FXCollections.observableArrayList();
     private static Network network;
 
+    private static ChatModel selectedChatModel;
+
+    public static ChatModel getSelectedChatModel() {
+        return selectedChatModel;
+    }
+
+    public static void setSelectedChatModel(ChatModel selectedChatModel) {
+        Context.selectedChatModel = selectedChatModel;
+    }
+
     public static UserModel getUserModel() {
         return userModel;
     }
-
     public static ObservableList<ChatModel> getChatModels() {
         return chatModels;
     }

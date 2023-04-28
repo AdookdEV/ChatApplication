@@ -1,25 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.JFXButton?>
+<?import java.lang.String?>
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.Reflection?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="266.0" snapToPixel="false" styleClass="chat-list-background" stylesheets="@../css/chat-list-section.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ka.adilet.chatapp.client.controller.ChatListController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="266.0" snapToPixel="false" styleClass="chat-list-background" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ka.adilet.chatapp.client.controller.ChatListController">
    <children>
-      <GridPane prefHeight="50.0">
+      <GridPane hgap="10.0" prefHeight="50.0">
          <columnConstraints>
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+            <ColumnConstraints hgrow="ALWAYS" />
+            <ColumnConstraints minWidth="10.0" />
          </columnConstraints>
          <rowConstraints>
             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <TextField fx:id="searchChatTextField" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="30.0" prefWidth="200.0" promptText="Search" snapToPixel="false" styleClass="search_text-field" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+            <TextField fx:id="searchChatTextField" focusTraversable="false" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" prefHeight="30.0" promptText="Search" snapToPixel="false" styleClass="search_text-field" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
+            <JFXButton fx:id="addChatButton" focusTraversable="false" maxWidth="1.7976931348623157E308" ripplerFill="WHITE" styleClass="add-chat-button" text="+" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+               <effect>
+                  <Reflection />
+               </effect>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </JFXButton>
          </children>
+         <padding>
+            <Insets left="10.0" right="10.0" />
+         </padding>
       </GridPane>
-      <ListView fx:id="chatListView" prefHeight="200.0" prefWidth="200.0" styleClass="chat-list-background" VBox.vgrow="ALWAYS" />
+      <ListView fx:id="chatListView" focusTraversable="false" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+         <styleClass>
+            <String fx:value="chat-list-background" />
+            <String fx:value="chatListView" />
+         </styleClass></ListView>
    </children>
+   <stylesheets>
+      <URL value="@../css/chat-list-section.css" />
+      <URL value="@../css/main.css" />
+   </stylesheets>
 </VBox>

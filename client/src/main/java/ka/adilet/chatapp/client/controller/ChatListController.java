@@ -1,17 +1,14 @@
 package ka.adilet.chatapp.client.controller;
 
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.shape.Circle;
 import ka.adilet.chatapp.client.ChatApplication;
 import ka.adilet.chatapp.client.model.ChatModel;
+import ka.adilet.chatapp.client.utils.Context;
 
 
 public class ChatListController {
@@ -19,20 +16,21 @@ public class ChatListController {
     private ListView<ChatModel> chatListView;
     @FXML
     private TextField searchChatTextField;
-
-    private ObservableList<ChatModel> chatModels;
+    @FXML
+    private Button addChatButton;
 
     @FXML
     public void initialize() {
         chatListView.setCellFactory(param -> new ChatListCell());
+        chatListView.setFocusTraversable(true);
     }
 
     public ListView<ChatModel> getChatListView() {
         return chatListView;
     }
 
-    public void setChatModels(ObservableList<ChatModel> items) {
-        chatListView.setItems(items);
+    public Button getAddChatButton() {
+        return addChatButton;
     }
 
     private static class ChatListCell extends ListCell<ChatModel> {
@@ -61,8 +59,23 @@ public class ChatListController {
                 setGraphic(null);
             } else {
                 if (item.getLastMessage() != null) {
-                    lastMessageLabel.setText(item.getLastMessage().getContent());
+                    String lm = item.getLastMessage().getContent();
+                    if (Context.getUserModel().getId() == item.getLastMessage().getSenderId()) {
+                        lm = "Me: " + lm;
+                    } else if (!item.isPrivateChat()) {
+                        lm = item.getLastMessage().getSenderName() + ": " + lm;
+                    }
+                    lastMessageLabel.setText(lm);
                 }
+//                else if (item.isPrivateChat()) {
+//                    try {
+//                        Context.getChatModels().remove(item);
+//                    } catch (Exception e) {
+//                        System.err.println(e);
+//                        System.out.println(Context.getChatModels());
+//                    }
+//                    return;
+//                }
                 chatNameLabel.setText(item.getChatName());
                 Image avatarImage = new Image(ChatApplication.class.getResourceAsStream(item.getAvatarImageName()));
                 avatarImageView.setImage(avatarImage);
