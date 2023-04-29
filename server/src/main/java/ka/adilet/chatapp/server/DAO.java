@@ -30,11 +30,7 @@ public class DAO {
         }
     }
 
-    public Connection getConnection() {
-        return conn;
-    }
-
-    private ArrayNode getAsArrayNode(ResultSet res) throws SQLException {
+    public ArrayNode getAsArrayNode(ResultSet res) throws SQLException {
         ResultSetMetaData rsmd = res.getMetaData();
         ArrayNode rows = jsonMapper.createArrayNode();
         while (res.next()) {
@@ -61,13 +57,49 @@ public class DAO {
     }
 
     public ArrayNode getChatsByUserId(Long userId) {
-        // TODO: 28.04.2023
-        return null;
+        try {
+            PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM \"ChatRoom\" " +
+                    "WHERE id in (SELECT chat_room_id FROM \"ChatRoomMember\" c WHERE c.member_id = ?);");
+            pstmt.setLong(1, userId);
+            return getAsArrayNode(pstmt.executeQuery());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public ArrayNode getMessagesByChatId(Long chatId) {
-        // TODO: 28.04.2023
-        return null;
+        try {
+            PreparedStatement pstmt = conn.prepareStatement("""
+                    SELECT m.id as id,\s
+                           content,\s
+                           sender_id,\s
+                           concat(u.name, ' ', u.surname) sender_name,\s
+                           chat_room_id, sent_time \s
+                    FROM "Message" m INNER JOIN "User" u ON m.sender_id = u.id WHERE chat_room_id = ?;""");
+            pstmt.setLong(1, chatId);
+            return getAsArrayNode(pstmt.executeQuery());
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public ArrayNode getChatMembers(Long chatRoomId) {
+        try {
+            PreparedStatement pstmt = conn.prepareStatement("""
+                            SELECT
+                                id, name, surname
+                            FROM
+                                "User"
+                            WHERE
+                                id in (SELECT member_id FROM "ChatRoomMember" WHERE chat_room_id = ?);
+                        """);
+            pstmt.setLong(1, chatRoomId);
+            return getAsArrayNode(pstmt.executeQuery());
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public ArrayNode getUsers(ArrayList<Long> ids, boolean all) {
@@ -176,5 +208,10 @@ public class DAO {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void main(String[] args) {
+        DAO db = new DAO();
+        System.out.println(db.getMessagesByChatId(58L));
     }
 }

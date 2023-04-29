@@ -67,15 +67,6 @@ public class ChatListController {
                     }
                     lastMessageLabel.setText(lm);
                 }
-//                else if (item.isPrivateChat()) {
-//                    try {
-//                        Context.getChatModels().remove(item);
-//                    } catch (Exception e) {
-//                        System.err.println(e);
-//                        System.out.println(Context.getChatModels());
-//                    }
-//                    return;
-//                }
                 chatNameLabel.setText(item.getChatName());
                 Image avatarImage = new Image(ChatApplication.class.getResourceAsStream(item.getAvatarImageName()));
                 avatarImageView.setImage(avatarImage);

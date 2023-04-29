@@ -4,15 +4,11 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.sql.*;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -23,16 +19,14 @@ import ka.adilet.chatapp.communication.MessageType;
 
 public class Server {
 
-    private ServerSocket socket;
-    private boolean isRunning = true;
     private static final ConcurrentHashMap<Long, ClientHandler> clients = new ConcurrentHashMap<>();
 
     public void start(int port) throws IOException, ClassNotFoundException {
         Class.forName("org.postgresql.Driver");
-        socket = new ServerSocket(port);
+        ServerSocket socket = new ServerSocket(port);
 
-        int cnt = 0;
-        while (isRunning) {
+        long cnt = 0;
+        while (!socket.isClosed()) {
             ClientHandler ch = new ClientHandler(socket.accept());
             ch.setName("Client #" + (++cnt));
             System.out.println(ch.getName() +" connected");
@@ -47,13 +41,11 @@ public class Server {
         private ObjectInputStream inputStream;
         private ObjectOutputStream outputStream;
         private final ObjectMapper jsonMapper = new ObjectMapper().registerModule(new JavaTimeModule());
-        private Connection conn;
         private Long client_id;
         private final DAO db;
 
         public ClientHandler(Socket socket) {
             db = new DAO();
-            conn = db.getConnection();
             clientSocket = socket;
         }
 
@@ -100,34 +92,12 @@ public class Server {
             return true;
         }
 
-        private ArrayNode getAsArrayNode(ResultSet res) throws SQLException {
-            ResultSetMetaData rsmd = res.getMetaData();
-            ArrayNode rows = jsonMapper.createArrayNode();
-            while (res.next()) {
-                ObjectNode node = jsonMapper.createObjectNode();
-                for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                    node.put(rsmd.getColumnName(i), res.getString(rsmd.getColumnName(i)));
-                }
-                rows.add(node);
-            }
-            return (rows.isEmpty()) ? null : rows;
-        }
-
-        private ArrayNode getChatsByUserId(Long userId) throws SQLException {
-            Statement st = conn.createStatement();
-            ArrayNode chatIds = getAsArrayNode(st.executeQuery(
-                    String.format("SELECT chat_room_id FROM \"ChatRoomMember\"  WHERE member_id = %s", userId)));
-            if (chatIds == null) return null;
-            ArrayNode chats = jsonMapper.createArrayNode();
-            for (JsonNode c_id : chatIds) {
-                long chatId = c_id.get("chat_room_id").asLong();
-                chats.add(getAsArrayNode(
-                        st.executeQuery("SELECT * FROM \"ChatRoom\" WHERE id=" + chatId)).get(0));
-            }
+        private ArrayNode getChatsByUserId(Long userId) {
+            ArrayNode chats = db.getChatsByUserId(userId);
             for (int i = 0; i < chats.size(); i++) {
                 long chatId = chats.get(i).get("id").asLong();
                 ObjectNode chatObjectNode = (ObjectNode)chats.get(i);
-                chatObjectNode.set("messages", getMessagesByChatId(chatId));
+                chatObjectNode.set("messages", db.getMessagesByChatId(chatId));
                 if (chatObjectNode.get("is_private").asText().equals("f")) {
                     chatObjectNode.put("is_private", "false");
                 } else {
@@ -138,57 +108,22 @@ public class Server {
             return chats;
         }
 
-        private ArrayNode getMessagesByChatId(Long chatId) throws SQLException {
-            Statement st = conn.createStatement();
-            String sql = String.format(
-                    """
-                            SELECT
-                                m.id as id,
-                            content,    sender_id,
-                                chat_room_id,
-                                sent_time,
-                                concat(u.name, ' ', u.surname) as sender_name
-                            FROM "Message" m INNER JOIN "User" u
-                                     ON m.sender_id = u.id
-                                     WHERE chat_room_id = %d;""",
-                    chatId
-            );
-            return getAsArrayNode(st.executeQuery(sql));
-        }
-
         private void deliverChatMessage(ObjectNode messageNode) {
             Long chatRoomId = messageNode.get("chat_room_id").asLong();
-            String sql = String.format(
-                        """
-                            SELECT
-                                id, name, surname
-                            FROM
-                                "User"
-                            WHERE
-                                id in (SELECT member_id FROM "ChatRoomMember" WHERE chat_room_id = %d);
-                        """,
-                    chatRoomId
-                    );
-            try {
-                ArrayNode users =  getAsArrayNode(conn.prepareStatement(sql).executeQuery());
-                System.out.println("Active clients count: " + clients.size() + ": ");
-                assert users != null;
-                for (JsonNode user : users) {
-                    Long userId = user.get("id").asLong();
-                    if (!clients.containsKey(userId)) continue;
-                    if (clients.get(userId) == this) continue;
-                    System.out.println("User id: " + userId);
-                    clients.get(userId).sendMessage(new CommunicationMessage(
-                            MessageType.CHAT,
-                            messageNode.toString()
-                    ));
-                }
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+            ArrayNode users = db.getChatMembers(chatRoomId);
+            for (JsonNode user : users) {
+                Long userId = user.get("id").asLong();
+                if (!clients.containsKey(userId)) continue;
+                if (clients.get(userId) == this) continue;
+                System.out.printf("Client with id %d: sending message to %d\n", this.client_id, userId);
+                clients.get(userId).sendMessage(new CommunicationMessage(
+                        MessageType.CHAT,
+                        messageNode.toString()
+                ));
             }
         }
 
-        private void handleGetUsers(CommunicationMessage cm) throws IOException, SQLException {
+        private void handleGetUsers(CommunicationMessage cm) throws IOException {
             System.out.printf("%s: get users request\n", getName());
             JsonNode jsonData = jsonMapper.readTree(cm.getBody());
 
@@ -220,7 +155,7 @@ public class Server {
                     "{\"result\": \"OK\"}"));
         }
 
-        private void handleChat(CommunicationMessage cm) throws SQLException, JsonProcessingException {
+        private void handleChat(CommunicationMessage cm) throws JsonProcessingException {
             System.out.printf("%s: chat request from user %d\n", getName(), this.client_id);
             ObjectNode messageNode = (ObjectNode) jsonMapper.readTree(cm.getBody());
             db.addMessage(messageNode);

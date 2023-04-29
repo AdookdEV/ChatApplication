@@ -33,14 +33,12 @@ import ka.adilet.chatapp.communication.CommunicationMessage;
 import ka.adilet.chatapp.communication.MessageType;
 
 
-
 public class ChatController {
     private final BooleanProperty isChatSelected = new SimpleBooleanProperty();
     private ListView<ChatModel> chatListView;
     private final Network network = Context.getNetwork();
     private final ObjectMapper jsonMapper = new ObjectMapper().registerModule(new JavaTimeModule());
-    
-    
+
     @FXML Parent chatListSection;
     @FXML Parent chattingSection;
     @FXML Pane shadowPane;
