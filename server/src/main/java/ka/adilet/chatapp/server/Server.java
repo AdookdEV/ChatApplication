@@ -111,6 +111,11 @@ public class Server {
         private void deliverChatMessage(ObjectNode messageNode) {
             Long chatRoomId = messageNode.get("chat_room_id").asLong();
             ArrayNode users = db.getChatMembers(chatRoomId);
+            ObjectNode response = jsonMapper.createObjectNode();
+            response.set("message", messageNode);
+            ObjectNode chat = (ObjectNode) db.getChat(chatRoomId);
+            chat.set("messages", db.getMessagesByChatId(chatRoomId));
+            response.set("chat", chat);
             for (JsonNode user : users) {
                 Long userId = user.get("id").asLong();
                 if (!clients.containsKey(userId)) continue;
@@ -118,7 +123,7 @@ public class Server {
                 System.out.printf("Client with id %d: sending message to %d\n", this.client_id, userId);
                 clients.get(userId).sendMessage(new CommunicationMessage(
                         MessageType.CHAT,
-                        messageNode.toString()
+                        response.toString()
                 ));
             }
         }

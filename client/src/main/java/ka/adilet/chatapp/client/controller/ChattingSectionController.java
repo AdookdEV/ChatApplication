@@ -3,7 +3,6 @@ package ka.adilet.chatapp.client.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -12,6 +11,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SelectionModel;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -34,6 +34,8 @@ public class ChattingSectionController {
     private UserModel userModel;
     private Network network;
     private final ObjectMapper jsonMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private SelectionModel<ChatModel> chatListSelection;
+
 
     @FXML
     private Button sendMessageButton;
@@ -67,6 +69,11 @@ public class ChattingSectionController {
         this.userModel = userModel;
     }
 
+
+    public void setChatListSelection(SelectionModel<ChatModel> chatListSelection) {
+        this.chatListSelection = chatListSelection;
+    }
+
     public void switchChat(ChatModel chatModel) {
         this.chatModel = chatModel;
         scrollPane.lookup(".increment-button").setStyle("visibility: false");
@@ -78,7 +85,8 @@ public class ChattingSectionController {
         if (messageContent.length() == 0) return;
         if (!network.isConnected.getValue()) return;
         if (!Context.getChatModels().contains(this.chatModel)) {
-            Context.getChatModels().add(this.chatModel);
+            Context.getChatModels().add(0, this.chatModel);
+            chatListSelection.select(this.chatModel);
         }
         MessageModel currMessage = new MessageModel(
                 chatModel.getChatRoomId(),

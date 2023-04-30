@@ -36,7 +36,12 @@ public class DAO {
         while (res.next()) {
             ObjectNode node = jsonMapper.createObjectNode();
             for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                node.put(rsmd.getColumnName(i), res.getString(rsmd.getColumnName(i)));
+                if (rsmd.getColumnTypeName(i) == "bool") {
+                    node.put(rsmd.getColumnName(i), res.getBoolean(i));
+                }
+                else {
+                    node.put(rsmd.getColumnName(i), res.getString(rsmd.getColumnName(i)));
+                }
             }
             rows.add(node);
         }
@@ -51,6 +56,16 @@ public class DAO {
                     .replace("()", "(-1)"));
             Statement stmt = conn.createStatement();
             return getAsArrayNode((stmt.executeQuery(sql)));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public JsonNode getChat(Long id) {
+        try {
+            String sql = String.format("SELECT * FROM \"ChatRoom\" WHERE id = %s", id);
+            Statement stmt = conn.createStatement();
+            return getAsArrayNode((stmt.executeQuery(sql))).get(0);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -137,11 +152,7 @@ public class DAO {
                     "INSERT INTO \"User\" (phone_number, name, surname, password) VALUES (?, ?, ?, ?)");
             pstmt.setString(1, user.get("phone_number").asText());
             pstmt.setString(2, user.get("name").asText());
-            if (user.get("surname").asText().length() > 0) {
-                pstmt.setString(3, user.get("surname").asText());
-            } else {
-                pstmt.setNull(3, Types.VARCHAR);
-            }
+            pstmt.setString(3, user.get("surname").asText());
             pstmt.setString(4, user.get("password").asText());
             pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -167,7 +178,6 @@ public class DAO {
 
     public Long addChat(JsonNode chat) {
         try {
-            System.out.println(chat.get("members"));
             PreparedStatement stmt = conn.prepareStatement("INSERT INTO \"ChatRoom\" (name, is_private) VALUES (?, ?);");
             stmt.setString(1, chat.get("name").asText());
             stmt.setBoolean(2, chat.get("is_private").asBoolean());
@@ -212,6 +222,6 @@ public class DAO {
 
     public static void main(String[] args) {
         DAO db = new DAO();
-        System.out.println(db.getMessagesByChatId(58L));
+        System.out.println(db.getChat(4L));
     }
 }

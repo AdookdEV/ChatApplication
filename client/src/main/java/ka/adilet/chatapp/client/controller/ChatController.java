@@ -9,7 +9,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -17,6 +19,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -50,8 +53,14 @@ public class ChatController {
     @FXML
     public void initialize() {
         chattingSectionController.setNetwork(network);
+        
+        
         chatListView = chatListSectionController.getChatListView();
         chatListView.setItems(Context.getChatModels());
+
+        chatListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        chattingSectionController.setChatListSelection(chatListView.getSelectionModel());
+ 
 
         isChatSelected.bind(chatListView.getSelectionModel().selectedItemProperty().isNotNull());
         isChatSelected.addListener((observable, oldValue, newValue) -> {
@@ -105,26 +114,39 @@ public class ChatController {
         requestBody.put("ids", "[]");
         network.sendMessage(new CommunicationMessage(MessageType.GET_USERS, requestBody.toString()));
     }
+    
 
     private void addMessageModel(CommunicationMessage response) {
         // Adds received messages from other users to corresponding chat models and updates UI
         MessageModel message;
+        JsonNode respNode;
+        ChatModel chat;
+        ChatModel selectedChat = chatListView.getSelectionModel().getSelectedItem();
         try {
-            message = jsonMapper.readValue(response.getBody(), MessageModel.class);
+            respNode = jsonMapper.readTree(response.getBody());
+            chat = jsonMapper.readValue(respNode.get("chat").toString(), ChatModel.class);
+            message = jsonMapper.readValue(respNode.get("message").toString(), MessageModel.class);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
         // Searches for corresponding chat model
+        boolean found = false;
         for (int i = 0; i < Context.getChatModels().size(); i++) {
             if (Context.getChatModels().get(i).getChatRoomId() != message.getChatRoomId()) continue;
             Context.getChatModels().get(i).addMessage(message);
+            found = true;
+        }
+        if (!found) {
+            ChatModel.formatChatName(chat);
+            chatListView.getItems().add(0, chat);
         }
         // Updates UI
-        ChatModel selectedChat = chatListView.getSelectionModel().getSelectedItem();
         if (selectedChat != null) {
             if (selectedChat.getChatRoomId() == message.getChatRoomId()) {
                 chattingSectionController.addChatMessageView(message);
             }
+        } else {
+            chatListView.getSelectionModel().clearSelection();
         }
     }
 
@@ -224,7 +246,7 @@ public class ChatController {
                 CommunicationMessage response;
                 while ((response = network.listen()) != null) {
                     System.out.println("listening for server...");
-                    System.out.println("[SERVER] " + response.getType() + ' ' + response.getBody());
+                    System.out.println("[SERVER] " + response.getType());
                     CommunicationMessage finalResponse = response;
                     Platform.runLater(() -> {
                         switch (finalResponse.getType()) {
