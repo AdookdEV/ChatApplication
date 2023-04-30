@@ -76,6 +76,7 @@ public class ChattingSectionController {
     private void sendMessage() {
         String messageContent = messageTextField.getText();
         if (messageContent.length() == 0) return;
+        if (!network.isConnected.getValue()) return;
         if (!Context.getChatModels().contains(this.chatModel)) {
             Context.getChatModels().add(this.chatModel);
         }

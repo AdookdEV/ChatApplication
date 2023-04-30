@@ -6,5 +6,5 @@ public enum MessageType {
     AUTHORIZATION_RESULT,
     CHAT,
     GET_USERS,
-    NEW_CHAT;
+    NEW_CHAT, CHECK_CONNECTION;
 }

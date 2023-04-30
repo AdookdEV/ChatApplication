@@ -43,4 +43,9 @@ public class Context {
     public static Network getNetwork() {
         return network;
     }
+
+    public static void clear() {
+        chatModels.clear();
+        userModel = null;
+    }
 }

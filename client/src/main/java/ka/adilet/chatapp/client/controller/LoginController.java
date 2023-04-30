@@ -9,7 +9,6 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
@@ -24,7 +23,6 @@ import ka.adilet.chatapp.client.view.CustomAnimation;
 import ka.adilet.chatapp.communication.CommunicationMessage;
 import ka.adilet.chatapp.communication.MessageType;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -40,7 +38,7 @@ public class LoginController implements Initializable {
     @FXML
     private TextField passwordTextField;
 
-    private Network network = Context.getNetwork();
+    private final Network network = Context.getNetwork();
     private final ObjectMapper jsonMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @Override
@@ -51,15 +49,15 @@ public class LoginController implements Initializable {
     @FXML
     public void singIn(ActionEvent event) {
         CustomAnimation.buttonClick(loginButton);
-        if (!network.isConnected()) return;
         if (!validate()) return;
+        if (!network.isConnected.getValue()) return;
         CommunicationMessage cm = new CommunicationMessage(MessageType.LOGIN,
                 String.format("{\"phone_number\": \"%s\", \"password\": \"%s\"}",
                         phoneTextField.getText(), passwordTextField.getText()));
         network.sendMessage(cm);
         Task<CommunicationMessage> task = new Task<>() {
             @Override
-            protected CommunicationMessage call() throws Exception {
+            protected CommunicationMessage call() {
                 return network.listen();
             }
         };
