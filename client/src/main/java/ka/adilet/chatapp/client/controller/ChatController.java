@@ -114,7 +114,6 @@ public class ChatController {
         requestBody.put("ids", "[]");
         network.sendMessage(new CommunicationMessage(MessageType.GET_USERS, requestBody.toString()));
     }
-    
 
     private void addMessageModel(CommunicationMessage response) {
         // Adds received messages from other users to corresponding chat models and updates UI

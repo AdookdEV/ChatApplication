@@ -3,7 +3,6 @@ package ka.adilet.chatapp.client.view;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.LightBase;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;

@@ -22,7 +22,7 @@ public class Network {
     private final int port;
     private boolean tryToReconnect = true;
     private final Thread heartbeatThread;
-    private long heartbeatDelayMillis = 1000;
+    private final long heartbeatDelayMillis = 1000;
     public final SimpleBooleanProperty isConnected = new SimpleBooleanProperty(true);
 
     public Network(String address, int port) {
@@ -73,10 +73,6 @@ public class Network {
         }
     }
 
-    public void shutdown() {
-        tryToReconnect = false;
-    }
-
     public void sendMessage(CommunicationMessage message) {
         try {
             outputStream.writeObject(message);
@@ -98,7 +94,7 @@ public class Network {
     }
 
     public void stopConnection() {
-        shutdown();
+        tryToReconnect = false;
         if (this.socket == null) return;
         try {
             socket.close();

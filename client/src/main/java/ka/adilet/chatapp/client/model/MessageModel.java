@@ -29,13 +29,6 @@ public class MessageModel {
         this.senderName = senderName;
     }
 
-//    public MessageModel() {
-//        this.senderId = 0;
-//        this.content = "Message";
-//        this.senderName = "Some name";
-//        this.sentTime = LocalDateTime.now();
-//    }
-
     @JsonGetter("chat_room_id")
     public long getChatRoomId() {
         return chatRoomId;
