@@ -125,10 +125,15 @@ public class ChattingSectionController {
             protected ArrayList<Pane> call() {
                 ArrayList<Pane> messageViews = new ArrayList<>();
                 for (MessageModel messageModel : chatModel.getMessageModels()) {
+                    LocalDateTime dateTime = messageModel.getSentTime();
+                    String date = dateTime.getDayOfMonth() + " "
+                            +  dateTime.getMonth().name() + " "
+                            + dateTime.getHour() + ":"
+                            + dateTime.getMinute();
                     Pane chatMessageView = new ChatMessageView("img/avatar.png",
                             messageModel.getContent(),
                             messageModel.getSenderName(),
-                            messageModel.getSentTime().toString(),
+                            date,
                             userModel.getId() != messageModel.getSenderId(),
                             false);
                     messageViews.add(chatMessageView);
@@ -141,10 +146,15 @@ public class ChattingSectionController {
     }
 
     public void addChatMessageView(MessageModel messageModel) {
+        LocalDateTime dateTime = messageModel.getSentTime();
+        String date = dateTime.getDayOfMonth() + " "
+                +  dateTime.getMonth().name() + " "
+                + dateTime.getHour() + ":"
+                + dateTime.getMinute();
         Pane chatMessageView  = new ChatMessageView("img/avatar.png",
                 messageModel.getContent(),
                 messageModel.getSenderName(),
-                messageModel.getSentTime().toString(),
+                date,
                 userModel.getId() != messageModel.getSenderId(),
                 false);
         messagesContainer.getChildren().add(chatMessageView);

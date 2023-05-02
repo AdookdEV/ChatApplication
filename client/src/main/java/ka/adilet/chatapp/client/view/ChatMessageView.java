@@ -103,7 +103,7 @@ public class ChatMessageView extends GridPane {
                 "-fx-padding: 2 10 5 10;");
 
         timeLabel.setStyle("-fx-text-fill: #acacac;" +
-                "-fx-font-size: 10;");
+                "-fx-font-size: 9;");
 
         messageOwnerLabel.setStyle("-fx-text-fill:  #30AB9B;" +
                 "-fx-font-weight: bold;" +
