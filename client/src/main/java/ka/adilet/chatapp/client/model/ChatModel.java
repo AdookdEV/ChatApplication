@@ -3,26 +3,29 @@ package ka.adilet.chatapp.client.model;
 
 import com.fasterxml.jackson.annotation.*;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import ka.adilet.chatapp.client.utils.Context;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
 public class ChatModel {
     private Long chatRoomId;
     private final SimpleStringProperty chatName = new SimpleStringProperty();
-
-    private ArrayList<MessageModel> messageModels;
+    private final ObservableList<MessageModel> messageModels = FXCollections.observableArrayList();
     private String avatarImageName;
     private Boolean isPrivateChat;
     private final Map<String, String> unrecognizedFields = new HashMap<>();
+    @JsonIgnore
+    private final SimpleStringProperty lastMessage = new SimpleStringProperty();
 
     public ChatModel() {
         this.avatarImageName = "img/avatar.png";
         this.isPrivateChat = false;
-        messageModels = new ArrayList<>();
     }
 
     @JsonCreator
@@ -32,12 +35,12 @@ public class ChatModel {
                      @JsonProperty("is_private") Boolean isPrivateChat) {
         this.chatRoomId = chatRoomId;
         this.chatName.set(chatName);
-        this.messageModels = messageModels;
+        if (messageModels != null) {
+            this.messageModels.addAll(messageModels);
+            this.lastMessageProperty().set(getLastMessageModel().getContent());
+        }
         this.avatarImageName = "img/avatar.png";
         this.isPrivateChat = isPrivateChat;
-        if (messageModels == null) {
-            this.messageModels = new ArrayList<>();
-        }
     }
 
     public static void formatChatName(ChatModel chat) {
@@ -55,21 +58,32 @@ public class ChatModel {
         return unrecognizedFields;
     }
 
+    public String getLastMessage() {
+        return lastMessage.getValue();
+    }
+
+    public ObservableList<MessageModel> observableMessagesList() {
+        return messageModels;
+    }
+
+    public MessageModel getLastMessageModel() {
+        if (messageModels.isEmpty()) return null;
+        return messageModels.get(messageModels.size() - 1);
+    }
+
+    public SimpleStringProperty lastMessageProperty() {
+        return lastMessage;
+    }
 
     @JsonGetter("id")
     public Long getChatRoomId() {
         return chatRoomId;
     }
     @JsonGetter("messages")
-    public ArrayList<MessageModel> getMessageModels() {
-        return messageModels;
+    public List<MessageModel> getMessageModels() {
+        return  messageModels;
     }
 
-    public MessageModel getLastMessage() {
-        return (this.messageModels.isEmpty())
-                ? null
-                : this.messageModels.get(this.messageModels.size() - 1);
-    }
     @JsonGetter("name")
     public String getChatName() {
         return chatName.getValue();
@@ -89,13 +103,9 @@ public class ChatModel {
         this.chatRoomId = chatRoomId;
     }
 
-    @JsonGetter("messages")
-    public void setMessageModels(ArrayList<MessageModel> messageModels) {
-        if (messageModels == null) {
-            this.messageModels = new ArrayList<>();
-            return;
-        }
-        this.messageModels = messageModels;
+    @JsonSetter("messages")
+    public void setMessageModels(List<MessageModel> messageModels) {
+        this.messageModels.addAll(messageModels);
     }
 
     @JsonSetter("is_private")
@@ -114,10 +124,12 @@ public class ChatModel {
 
     public void addMessage(MessageModel messageModel) {
         messageModels.add(messageModel);
+        lastMessage.set(messageModel.getContent());
     }
 
     @JsonAnySetter
     public void allSetter(String fieldName, String value) {
         unrecognizedFields.put(fieldName, value);
     }
+
 }

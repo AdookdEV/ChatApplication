@@ -9,9 +9,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -53,8 +51,7 @@ public class ChatController {
     @FXML
     public void initialize() {
         chattingSectionController.setNetwork(network);
-        
-        
+
         chatListView = chatListSectionController.getChatListView();
         chatListView.setItems(Context.getChatModels());
 
@@ -68,8 +65,8 @@ public class ChatController {
             chattingSection.setDisable(oldValue);
         });
 
-        chatListView.getSelectionModel().selectedItemProperty().addListener(((observableValue, oldValue, newValue) -> {
-            Context.setSelectedChatModel(newValue);
+        chatListView.getSelectionModel().selectedItemProperty()
+                .addListener(((observableValue, oldValue, newValue) -> {
             if (newValue != null) {
                 chattingSectionController.switchChat(newValue);
             }
