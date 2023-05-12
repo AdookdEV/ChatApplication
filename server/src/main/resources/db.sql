@@ -1,3 +1,5 @@
+create database "ChatAppDB";
+
 create table if not exists "User"
 (
     id           bigserial
