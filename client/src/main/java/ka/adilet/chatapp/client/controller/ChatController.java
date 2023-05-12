@@ -202,7 +202,7 @@ public class ChatController {
 
     private void selectUserToChat() {
         JsonNode user = dialogListView.getSelectionModel().getSelectedItem();
-
+        if (user == null) return;
         // Check if selected user had conversation with current user
         for (ChatModel chatModel : Context.getChatModels()) {
             if (!chatModel.isPrivateChat()) continue;

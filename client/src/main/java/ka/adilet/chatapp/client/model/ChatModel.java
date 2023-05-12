@@ -35,7 +35,7 @@ public class ChatModel {
                      @JsonProperty("is_private") Boolean isPrivateChat) {
         this.chatRoomId = chatRoomId;
         this.chatName.set(chatName);
-        if (messageModels != null) {
+        if (messageModels != null && !messageModels.isEmpty()) {
             this.messageModels.addAll(messageModels);
             this.lastMessageProperty().set(getLastMessageModel().getContent());
         }

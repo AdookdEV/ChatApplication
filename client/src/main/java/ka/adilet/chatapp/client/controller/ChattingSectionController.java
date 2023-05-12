@@ -69,7 +69,6 @@ public class ChattingSectionController {
         this.userModel = userModel;
     }
 
-
     public void setChatListSelection(SelectionModel<ChatModel> chatListSelection) {
         this.chatListSelection = chatListSelection;
     }
@@ -95,7 +94,7 @@ public class ChattingSectionController {
                 messageContent,
                 LocalDateTime.now()
         );
-        chatModel.addMessage(currMessage);
+
         try {
             network.sendMessage(new CommunicationMessage(
                     MessageType.CHAT,
@@ -105,8 +104,10 @@ public class ChattingSectionController {
             e.printStackTrace();
             return;
         }
-        messageTextField.clear();
+        chatModel.addMessage(currMessage);
         addChatMessageView(currMessage);
+        messageTextField.clear();
+
     }
 
     private void updateView() {

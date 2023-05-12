@@ -178,6 +178,17 @@ public class DAO {
 
     public Long addChat(JsonNode chat) {
         try {
+            String chat_name = chat.get("name").asText();
+            if (chat.get("is_private").asBoolean()) {
+                PreparedStatement pstmt =  conn.prepareStatement("SELECT id FROM \"ChatRoom\" " +
+                        "WHERE name LIKE ? AND name LIKE ? AND is_private;");
+                pstmt.setString(1, "%" + chat_name.split(", ")[0] + "%");
+                pstmt.setString(2, "%" + chat_name.split(", ")[1] + "%");
+                ResultSet res = pstmt.executeQuery();
+                if (res.next()) {
+                    return res.getLong(1);
+                }
+            }
             PreparedStatement stmt = conn.prepareStatement("INSERT INTO \"ChatRoom\" (name, is_private) VALUES (?, ?);");
             stmt.setString(1, chat.get("name").asText());
             stmt.setBoolean(2, chat.get("is_private").asBoolean());
@@ -218,10 +229,5 @@ public class DAO {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static void main(String[] args) {
-        DAO db = new DAO();
-        System.out.println(db.getChat(4L));
     }
 }
